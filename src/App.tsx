@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TaskTree } from './components/TaskTree';
 import { DeepestTasks } from './components/DeepestTasks';
 import { useTasks } from './hooks/useTasks';
@@ -17,6 +17,19 @@ function App() {
     updateTask,
     deleteTask,
   } = useTasks();
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === '[' || event.key === 'х') {
+        setViewMode('deepest');
+      } else if (event.key === ']' || event.key === 'ъ') {
+        setViewMode('tree');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   if (error) {
     return (
@@ -68,7 +81,7 @@ function App() {
                   }`}
                 >
                   <i className="fas fa-list mr-2"></i>
-                  Deepest Tasks
+                  Deepest Tasks [<span className="text-xs">[</span>]
                 </button>
                 <button
                   onClick={() => setViewMode('tree')}
@@ -79,7 +92,7 @@ function App() {
                   }`}
                 >
                   <i className="fas fa-sitemap mr-2"></i>
-                  Full Tree
+                  Full Tree [<span className="text-xs">]</span>]
                 </button>
               </div>
             </div>
