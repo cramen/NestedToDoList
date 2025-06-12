@@ -12,6 +12,8 @@ interface TaskItemProps {
   showChildren?: boolean;
   onToggleChildren?: (taskId: number) => void;
   expandedTasks?: Set<number>;
+  selectedTaskId?: number | null;
+  isNavigationActive?: boolean;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -24,6 +26,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   showChildren = true,
   onToggleChildren,
   expandedTasks = new Set(),
+  selectedTaskId,
+  isNavigationActive = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -35,6 +39,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const indentClass = `ml-${Math.min(depth * 4, 16)}`;
   const hasChildren = task.children && task.children.length > 0;
   const isExpanded = expandedTasks.has(task.id);
+  const isSelected = isNavigationActive && selectedTaskId === task.id;
 
   const handleToggleComplete = async () => {
     setLoading(true);
@@ -49,7 +54,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const handleSaveEdit = async () => {
     if (!editTitle.trim()) return;
-    
+
     setLoading(true);
     try {
       await onUpdate(task.id, {
@@ -98,7 +103,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <div className={`${depth > 0 ? indentClass : ''}`}>
       <div className="border-l-2 border-gray-200 pl-4 mb-2">
-        <div className="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+        <div className={`bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-all ${
+          isSelected
+            ? 'ring-2 ring-blue-500 border-blue-500 shadow-lg'
+            : ''
+        }`}>
           <div className="flex items-start gap-3">
             {/* Expand/Collapse button */}
             {hasChildren && onToggleChildren && (
@@ -240,6 +249,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               showChildren={showChildren}
               onToggleChildren={onToggleChildren}
               expandedTasks={expandedTasks}
+              selectedTaskId={selectedTaskId}
+              isNavigationActive={isNavigationActive}
             />
           ))}
         </div>

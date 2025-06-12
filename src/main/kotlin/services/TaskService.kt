@@ -12,18 +12,18 @@ import java.time.LocalDateTime
 class TaskService {
     
     fun getAllTasks(): List<Task> = transaction {
-        val allTasks = TaskTable.selectAll().map { rowToTask(it) }
+        val allTasks = TaskTable.select(not(TaskTable.isCompleted)).map { rowToTask(it) }
         buildTaskTree(allTasks)
     }
     
     fun getDeepestTasks(): List<Task> = transaction {
         // Get tasks that have no children (deepest level)
         val tasksWithChildren = TaskTable.slice(TaskTable.parentId)
-            .select { TaskTable.parentId.isNotNull() }
-            .map { it[TaskTable.parentId] }
+            .select { TaskTable.parentId.isNotNull() and not(TaskTable.isCompleted) }
+            .mapNotNull { it[TaskTable.parentId] }
             .toSet()
-        
-        TaskTable.select { TaskTable.id notInList tasksWithChildren }
+
+        TaskTable.select { TaskTable.id notInList tasksWithChildren and not(TaskTable.isCompleted)  }
             .map { rowToTask(it) }
     }
     
@@ -79,8 +79,8 @@ class TaskService {
     }
     
     fun getTaskTree(rootId: Long): Task? = transaction {
-        val task = getTaskById(rootId) ?: return@transaction null
-        val allTasks = TaskTable.selectAll().map { rowToTask(it) }
+//        val task = getTaskById(rootId) ?: return@transaction null
+        val allTasks = TaskTable.select(not(TaskTable.isCompleted)).map { rowToTask(it) }
         buildTaskTreeFromRoot(allTasks, rootId)
     }
     

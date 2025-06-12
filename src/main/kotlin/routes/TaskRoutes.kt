@@ -16,7 +16,9 @@ fun Route.configureTaskRoutes() {
         // Get all tasks as tree structure
         get {
             try {
-                val tasks = taskService.getAllTasks()
+                val tasks = taskService.getAllTasks().mapNotNull {
+                    taskService.getTaskTree(it.id)
+                }
                 call.respond(TaskListResponse(
                     success = true,
                     message = "Tasks retrieved successfully",

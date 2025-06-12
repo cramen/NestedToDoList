@@ -49,7 +49,7 @@ function App() {
               <i className="fas fa-tasks text-2xl text-blue-500 mr-3"></i>
               <h1 className="text-2xl font-bold text-gray-900">Hierarchical Todo List</h1>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {loading && (
                 <div className="flex items-center text-gray-600">
@@ -57,7 +57,7 @@ function App() {
                   <span className="text-sm">Loading...</span>
                 </div>
               )}
-              
+
               <div className="flex bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('deepest')}
