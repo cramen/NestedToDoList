@@ -77,6 +77,37 @@ export const TaskView: React.FC<TaskViewProps> = ({
   // Get flat list of visible tasks (for navigation only)
   // const visibleTasks = isTreeView ? getVisibleTasks(tasks, expandedTasks) : tasks;
 
+  // Patch: wrap ops.handleDelete and ops.handleToggleComplete to update focus after removal
+  const handleDeleteWithFocus = async (taskId: number) => {
+    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevSelected = nav.selectedTaskId;
+    const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
+    await ops.handleDelete(taskId);
+    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    if (!newVisible.some(t => t.id === prevSelected)) {
+      if (prevIndex > 0) {
+        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
+      } else {
+        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
+      }
+    }
+  };
+
+  const handleToggleCompleteWithFocus = async (task: Task) => {
+    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevSelected = nav.selectedTaskId;
+    const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
+    await ops.handleToggleComplete(task);
+    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    if (!newVisible.some(t => t.id === prevSelected)) {
+      if (prevIndex > 0) {
+        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
+      } else {
+        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
+      }
+    }
+  };
+
   return (
     <div
       ref={nav.containerRef}
@@ -149,9 +180,9 @@ export const TaskView: React.FC<TaskViewProps> = ({
           editDescription={ops.editDescription}
           setEditTitle={ops.setEditTitle}
           setEditDescription={ops.setEditDescription}
-          onToggleComplete={ops.handleToggleComplete}
+          onToggleComplete={handleToggleCompleteWithFocus}
           onStartEdit={ops.handleStartEdit}
-          onDelete={ops.handleDelete}
+          onDelete={handleDeleteWithFocus}
           onCreateSibling={ops.handleCreateSibling}
           onCreateSubtask={ops.handleCreateSubtask}
           onSaveEdit={ops.handleSaveEdit}

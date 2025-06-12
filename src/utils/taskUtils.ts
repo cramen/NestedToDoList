@@ -51,3 +51,8 @@ export const getTaskPath = (tasks: Task[], targetId: number, currentPath: Task[]
   }
   return null;
 };
+
+export const getRootTask = (tasks: Task[], taskId: number): Task | null => {
+  const path = getTaskPath(tasks, taskId);
+  return path ? path[0] : null;
+};

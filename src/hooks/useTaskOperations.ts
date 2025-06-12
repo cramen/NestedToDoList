@@ -85,7 +85,7 @@ export const useTaskOperations = ({
     } catch (error) {
       console.error('Failed to create sibling task:', error);
     } finally {
-      setShowSiblingForm(null);
+      setLoading(null);
       onFormClose && onFormClose();
     }
   };
@@ -96,7 +96,7 @@ export const useTaskOperations = ({
     } catch (error) {
       console.error('Failed to create subtask:', error);
     } finally {
-      setShowSubtaskForm(null);
+      setLoading(null);
       onFormClose && onFormClose();
     }
   };
@@ -107,7 +107,7 @@ export const useTaskOperations = ({
     } catch (error) {
       console.error('Failed to create task:', error);
     } finally {
-      setShowNewTaskForm(false);
+      setLoading(null);
       onFormClose && onFormClose();
     }
   };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CreateTaskRequest } from '../types/Task';
 
 interface TaskFormProps {
@@ -17,8 +17,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Using useCallback to memoize handleSubmit, as it's a dependency of useEffect
+  const handleSubmit = useCallback(async (e: React.FormEvent | KeyboardEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -29,6 +31,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         description: description.trim() || undefined,
         parentId,
       });
+      // Clear form and close on successful submission
       setTitle('');
       setDescription('');
       onCancel();
@@ -37,10 +40,33 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [title, description, parentId, onSubmit, onCancel]); // Dependencies for useCallback
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if the event originated from within this form, specifically from its input fields
+      if (formRef.current && formRef.current.contains(e.target as Node)) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onCancel(); // Directly call onCancel for Escape key
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          // Only submit if not already loading and title is not empty
+          if (!loading && title.trim()) {
+            handleSubmit(e); // Pass the keyboard event to handleSubmit
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [title, loading, onCancel, handleSubmit]);
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 border rounded-lg shadow-sm">
+    <form ref={formRef} onSubmit={handleSubmit} className="bg-white p-4 border rounded-lg shadow-sm">
       <div className="space-y-3">
         <div>
           <input
