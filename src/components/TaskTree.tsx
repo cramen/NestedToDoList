@@ -10,6 +10,7 @@ interface TaskTreeProps {
   onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
   onNavigateToParent?: (taskId: number) => void;
   onNavigateToChild?: (taskId: number) => void;
+  title?: string;
 }
 
 export const TaskTree: React.FC<TaskTreeProps> = ({
@@ -20,6 +21,7 @@ export const TaskTree: React.FC<TaskTreeProps> = ({
   onCreateSibling,
   onNavigateToParent,
   onNavigateToChild,
+  title = "Full Task Tree",
 }) => {
   return (
     <TaskView
@@ -30,7 +32,7 @@ export const TaskTree: React.FC<TaskTreeProps> = ({
       onCreateSibling={onCreateSibling}
       onNavigateToParent={onNavigateToParent}
       onNavigateToChild={onNavigateToChild}
-      title="Full Task Tree"
+      title={title}
       isTreeView={true}
     />
   );

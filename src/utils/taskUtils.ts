@@ -44,9 +44,11 @@ export const getTaskPath = (tasks: Task[], targetId: number, currentPath: Task[]
     if (task.id === targetId) {
       return newPath;
     }
-    const pathInChildren = getTaskPath(task.children, targetId, newPath);
-    if (pathInChildren) {
-      return pathInChildren;
+    if (task.children && task.children.length > 0) {
+      const pathInChildren = getTaskPath(task.children, targetId, newPath);
+      if (pathInChildren) {
+        return pathInChildren;
+      }
     }
   }
   return null;

@@ -15,6 +15,7 @@ interface TaskViewProps {
   onNavigateToChild?: (taskId: number) => void;
   title: string;
   isTreeView?: boolean;
+  allTasks?: Task[];
 }
 
 // Helper function to get flat list of visible tasks
@@ -42,6 +43,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
   onNavigateToChild,
   title,
   isTreeView = false,
+  allTasks = [],
 }) => {
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
@@ -194,6 +196,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
           isTreeView={isTreeView}
           expandedTasks={ops.expandedTasks}
           onToggleExpand={ops.handleToggleExpand}
+          allTasks={allTasks}
         />
       )}
     </div>

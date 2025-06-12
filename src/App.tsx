@@ -109,6 +109,7 @@ function App() {
               onDelete={deleteTask}
               onCreateTask={createTask}
               onCreateSibling={createSiblingTask}
+              allTasks={tasks}
             />
           ) : (
             <TaskTree

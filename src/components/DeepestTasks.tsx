@@ -8,6 +8,7 @@ interface DeepestTasksProps {
   onDelete: (id: number) => Promise<void>;
   onCreateTask: (task: CreateTaskRequest) => Promise<void>;
   onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
+  allTasks?: Task[];
 }
 
 export const DeepestTasks: React.FC<DeepestTasksProps> = ({
@@ -16,6 +17,7 @@ export const DeepestTasks: React.FC<DeepestTasksProps> = ({
   onDelete,
   onCreateTask,
   onCreateSibling,
+  allTasks = [],
 }) => {
   return (
     <TaskView
@@ -25,6 +27,7 @@ export const DeepestTasks: React.FC<DeepestTasksProps> = ({
       onCreateTask={onCreateTask}
       onCreateSibling={onCreateSibling}
       title="Deepest Level Tasks"
+      allTasks={allTasks}
     />
   );
 };
