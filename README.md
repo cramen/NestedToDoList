@@ -12,6 +12,7 @@ docker-compose up
 
 ## запускаем фронт
 ```shell
+cd frontend
 npm install
 npm run dev
 ```
