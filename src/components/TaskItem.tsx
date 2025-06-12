@@ -161,25 +161,25 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={onStartEdit}
-                    className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
+                    className="text-xs text-blue-500 hover:text-blue-700 p-1 rounded"
                   >
                     <i className="fas fa-edit"></i>
                   </button>
                   <button
                     onClick={() => setShowSubtaskForm(task.id)}
-                    className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
+                    className="text-xs text-green-500 hover:text-green-700 p-1 rounded"
                   >
                     <i className="fas fa-level-down-alt"></i>
                   </button>
                   <button
                     onClick={() => setShowSiblingForm(task.id)}
-                    className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
+                    className="text-xs text-purple-500 hover:text-purple-700 p-1 rounded"
                   >
                     <i className="fas fa-plus-square"></i>
                   </button>
                   <button
                     onClick={onDelete}
-                    className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
+                    className="text-xs text-red-500 hover:text-red-700 p-1 rounded"
                   >
                     <i className="fas fa-trash"></i>
                   </button>

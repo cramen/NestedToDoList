@@ -4,6 +4,7 @@ import { TaskForm } from './TaskForm';
 import { TaskList } from './TaskList';
 import { useTaskNavigation } from '../hooks/useTaskNavigation';
 import { useTaskOperations } from '../hooks/useTaskOperations';
+import { PenguinAnimation } from './PenguinAnimation';
 
 interface TaskViewProps {
   tasks: Task[];
@@ -165,10 +166,15 @@ export const TaskView: React.FC<TaskViewProps> = ({
         />
       )}
       {!tasks?.length ? (
-        <div className="text-center py-8 text-gray-500">
-          <i className="fas fa-tasks text-4xl mb-4 text-gray-300"></i>
-          <p className="text-lg">No tasks found</p>
-          <p className="text-sm">Create your first task to get started!</p>
+        <div className="text-center py-8 flex flex-col items-center justify-center">
+          <PenguinAnimation />
+          <p className="text-lg text-gray-500">Похоже, пока нет задач.</p>
+          <button 
+            onClick={() => ops.setShowNewTaskForm(true)} 
+            className="text-sm text-blue-500 hover:text-blue-700 cursor-pointer mt-2 focus:outline-none"
+          >
+            Создайте свою первую задачу, чтобы начать!
+          </button>
         </div>
       ) : (
         <TaskList

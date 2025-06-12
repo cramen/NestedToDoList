@@ -23,6 +23,10 @@ interface TaskCardProps {
   setShowSiblingFormId?: (id: number | null) => void;
   showSubtaskFormId?: number | null;
   setShowSubtaskFormId?: (id: number | null) => void;
+  isTreeView?: boolean;
+  hasChildren?: boolean;
+  onToggleExpand?: () => void;
+  isExpanded?: boolean;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -46,6 +50,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   setShowSiblingFormId,
   showSubtaskFormId,
   setShowSubtaskFormId,
+  isTreeView,
+  hasChildren,
+  onToggleExpand,
+  isExpanded,
 }) => {
   const isEditing = editingTaskId === task.id;
   const showSiblingForm = showSiblingFormId === task.id;
@@ -53,11 +61,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <div
-      className={`bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-all ${
-        isNavigationActive && isSelected ? 'ring-2 ring-blue-500 border-blue-500 shadow-lg' : ''
+      className={`bg-white border-b border-gray-200 py-3 px-4 transition-all duration-200 ${
+        isNavigationActive && isSelected ? 'bg-blue-50 border-blue-500' : ''
       }`}
     >
       <div className="flex items-start gap-3">
+        {isTreeView && hasChildren && (
+          <button
+            onClick={onToggleExpand}
+            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 mt-1"
+          >
+            <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
+          </button>
+        )}
         <button
           onClick={() => onToggleComplete(task)}
           disabled={typeof loading === 'number' && loading === task.id}
@@ -114,28 +130,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => onStartEdit(task)}
-                  className="text-xs text-blue-500 hover:text-blue-700"
+                  className="text-xs text-blue-500 hover:text-blue-700 p-1 rounded"
                 >
-                  <i className="fas fa-edit"></i> Edit
+                  <i className="fas fa-edit"></i>
                 </button>
                 <button
                   onClick={() => setShowSiblingFormId && setShowSiblingFormId(task.id)}
-                  className="text-xs text-purple-500 hover:text-purple-700"
+                  className="text-xs text-purple-500 hover:text-purple-700 p-1 rounded"
                 >
-                  <i className="fas fa-plus"></i> Add Sibling
+                  <i className="fas fa-plus-square"></i>
                 </button>
                 <button
                   onClick={() => setShowSubtaskFormId && setShowSubtaskFormId(task.id)}
-                  className="text-xs text-green-500 hover:text-green-700"
+                  className="text-xs text-green-500 hover:text-green-700 p-1 rounded"
                 >
-                  <i className="fas fa-plus"></i> Add Subtask
+                  <i className="fas fa-level-down-alt"></i>
                 </button>
                 <button
                   onClick={() => onDelete(task.id)}
                   disabled={typeof loading === 'number' && loading === task.id}
-                  className="text-xs text-red-500 hover:text-red-700"
+                  className="text-xs text-red-500 hover:text-red-700 p-1 rounded"
                 >
-                  <i className="fas fa-trash"></i> Delete
+                  <i className="fas fa-trash"></i>
                 </button>
               </div>
               {showSiblingForm && (

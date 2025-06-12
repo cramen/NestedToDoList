@@ -1,0 +1,149 @@
+.penguin-container {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.penguin {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  animation: sway 2s infinite alternate ease-in-out;
+}
+
+.penguin-body {
+  width: 120px;
+  height: 150px;
+  background-color: #333;
+  border-radius: 60px 60px 80px 80px;
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  transform-origin: bottom center;
+  animation: bounce 1s infinite alternate ease-in-out;
+}
+
+.penguin-head {
+  width: 80px;
+  height: 80px;
+  background-color: #333;
+  border-radius: 50%;
+  position: absolute;
+  top: -20px;
+  left: 20px;
+}
+
+.penguin-face {
+  width: 50px;
+  height: 40px;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 30px;
+  left: 15px;
+}
+
+.penguin-eye {
+  width: 8px;
+  height: 8px;
+  background-color: #333;
+  border-radius: 50%;
+  position: absolute;
+  top: 40px;
+}
+
+.penguin-eye.left {
+  left: 25px;
+}
+
+.penguin-eye.right {
+  right: 25px;
+}
+
+.penguin-beak {
+  width: 20px;
+  height: 10px;
+  background-color: orange;
+  border-radius: 0 0 10px 10px;
+  position: absolute;
+  top: 50px;
+  left: 30px;
+}
+
+.penguin-belly {
+  width: 80px;
+  height: 90px;
+  background-color: #fff;
+  border-radius: 40px 40px 60px 60px;
+  position: absolute;
+  top: 60px;
+  left: 20px;
+}
+
+.penguin-wing {
+  width: 35px;
+  height: 60px;
+  background-color: #333;
+  border-radius: 15px 15px 0 0;
+  position: absolute;
+  top: 70px;
+  transform-origin: top center;
+  animation: flap 0.5s infinite alternate ease-in-out;
+}
+
+.penguin-wing.left {
+  left: -10px;
+  transform: rotate(-10deg);
+}
+
+.penguin-wing.right {
+  right: -10px;
+  transform: rotate(10deg);
+}
+
+.penguin-feet {
+  width: 30px;
+  height: 15px;
+  background-color: orange;
+  border-radius: 0 0 10px 10px;
+  position: absolute;
+  top: 170px;
+}
+
+.penguin-feet.left {
+  left: 50px;
+  transform: rotate(-5deg);
+}
+
+.penguin-feet.right {
+  right: 50px;
+  transform: rotate(5deg);
+}
+
+/* Animations */
+@keyframes sway {
+  0% { transform: translateX(-5px); }
+  100% { transform: translateX(5px); }
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+@keyframes flap {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-20deg); }
+}
+
+@keyframes jump {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0); }
+}
+
+.penguin-container.clicked .penguin-body {
+  animation: bounce 0.3s ease-out,
+             jump 0.5s ease-out; /* Combined with existing bounce, adjust as needed */
+} 
