@@ -125,7 +125,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-          {nav.isNavigationActive && tasks.length > 0 && (
+          {nav.isNavigationActive && tasks?.length > 0 && (
             <div className="text-xs text-gray-500 mt-1">
               Navigation: ↑↓ move, ←→ levels, Enter toggle, E edit, N new, S sibling, C child, Del delete
               {isTreeView && ', X expand all, Z collapse all'}
@@ -164,7 +164,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
           placeholder="Enter new task title..."
         />
       )}
-      {tasks.length === 0 ? (
+      {!tasks?.length ? (
         <div className="text-center py-8 text-gray-500">
           <i className="fas fa-tasks text-4xl mb-4 text-gray-300"></i>
           <p className="text-lg">No tasks found</p>

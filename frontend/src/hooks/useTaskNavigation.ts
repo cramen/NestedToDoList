@@ -62,12 +62,17 @@ const getVisibleTasks = (tasks: Task[], expandedTasks: Set<number>): Task[] => {
   const result: Task[] = [];
   
   const traverse = (task: Task) => {
+    if (!task) {
+      console.warn("Skipping null/undefined task in traversal:", task);
+      return;
+    }
     result.push(task);
-    if (task.children && task.children.length > 0 && expandedTasks.has(task.id)) {
+    if (Array.isArray(task.children) && task.children.length > 0 && expandedTasks.has(task.id)) {
       task.children.forEach(traverse);
     }
   };
 
+  console.log("DEBUG: tasks before forEach in getVisibleTasks:", tasks);
   tasks.forEach(traverse);
   return result;
 };
@@ -87,7 +92,7 @@ const findParentId = (tasks: Task[], childId: number): number | null => {
 };
 
 export function useTaskNavigation(
-  tasks: Task[],
+  tasks: Task[] = [], // Ensure tasks is always an array by defaulting it to an empty array
   options?: {
     onNavigateToParent?: (taskId: number) => void;
     onNavigateToChild?: (taskId: number) => void;
