@@ -89,20 +89,6 @@ const findParentId = (tasks: Task[], childId: number): number | null => {
   return null;
 };
 
-// Helper to find next visible task in a pre-computed visible list
-const findNextInVisibleList = (visibleTasks: Task[], currentTask: Task): Task | null => {
-  const currentIndex = visibleTasks.findIndex(t => t.id === currentTask.id);
-  if (currentIndex === -1 || currentIndex >= visibleTasks.length - 1) return null;
-  return visibleTasks[currentIndex + 1];
-};
-
-// Helper to find previous visible task in a pre-computed visible list
-const findPreviousInVisibleList = (visibleTasks: Task[], currentTask: Task): Task | null => {
-  const currentIndex = visibleTasks.findIndex(t => t.id === currentTask.id);
-  if (currentIndex <= 0) return null;
-  return visibleTasks[currentIndex - 1];
-};
-
 export function useTaskNavigation(
   tasks: Task[] = [], // Ensure tasks is always an array by defaulting it to an empty array
   options?: {
