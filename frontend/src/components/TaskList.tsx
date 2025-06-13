@@ -67,7 +67,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           task={task}
           depth={depth}
           selectedTaskId={selectedTaskId}
-          setSelectedTaskId={setSelectedTaskId}
           isNavigationActive={isNavigationActive}
           isLoading={loading === task.id}
           isEditing={editingTaskId === task.id}

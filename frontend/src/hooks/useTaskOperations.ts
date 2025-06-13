@@ -7,7 +7,6 @@ interface UseTaskOperationsProps {
   onCreateTask: (task: CreateTaskRequest) => Promise<Task>;
   onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<Task>;
   onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<Task>;
-  isTreeView?: boolean;
   onFormClose?: () => void;
 }
 
@@ -17,7 +16,6 @@ export const useTaskOperations = ({
   onCreateTask,
   onCreateSibling,
   onCreateSubtask,
-  isTreeView = false,
   onFormClose,
 }: UseTaskOperationsProps) => {
   const [loading, setLoading] = useState<number | null>(null);

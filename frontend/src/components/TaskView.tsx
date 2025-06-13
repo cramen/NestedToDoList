@@ -58,11 +58,10 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onCreateTask,
     onCreateSibling,
     onCreateSubtask,
-    isTreeView,
     onFormClose,
   });
 
-  const nav = useTaskNavigation(tasks, {
+  const nav = useTaskNavigation(isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks, {
     onNavigateToParent,
     onNavigateToChild,
     editingTask: ops.editingTask,
@@ -81,16 +80,13 @@ export const TaskView: React.FC<TaskViewProps> = ({
     expandedTasks: ops.expandedTasks,
   });
 
-  // Get flat list of visible tasks (for navigation only)
-  const visibleTasks = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-
   // Patch: wrap ops.handleDelete and ops.handleToggleComplete to update focus after removal
   const handleDeleteWithFocus = async (taskId: number) => {
-    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleDelete(taskId);
-    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
         nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
@@ -101,11 +97,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
   };
 
   const handleToggleCompleteWithFocus = async (task: Task) => {
-    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleToggleComplete(task);
-    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
         nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
