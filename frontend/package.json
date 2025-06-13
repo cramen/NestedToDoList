@@ -4,6 +4,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "build": "tsc && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist -b serverless",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

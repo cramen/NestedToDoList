@@ -67,7 +67,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           task={task}
           depth={depth}
           selectedTaskId={selectedTaskId}
-          setSelectedTaskId={setSelectedTaskId}
           isNavigationActive={isNavigationActive}
           isLoading={loading === task.id}
           isEditing={editingTaskId === task.id}
@@ -93,7 +92,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           allTasks={allTasks}
         />
         {isTreeView && isExpanded && task.children && task.children.length > 0 && (
-          <div className="ml-4">
+          <div className="ml-4 space-y-2">
             {task.children.map(child => renderTask(child, depth + 1))}
           </div>
         )}

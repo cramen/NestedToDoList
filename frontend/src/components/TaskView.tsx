@@ -1,5 +1,5 @@
 import React from 'react';
-import { Task, CreateTaskRequest } from '../types/Task';
+import { Task, CreateTaskRequest, UpdateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { TaskList } from './TaskList';
 import { useTaskNavigation } from '../hooks/useTaskNavigation';
@@ -8,10 +8,11 @@ import { PenguinAnimation } from './PenguinAnimation';
 
 interface TaskViewProps {
   tasks: Task[];
-  onUpdate: (id: number, updates: any) => Promise<void>;
+  onUpdate: (id: number, updates: UpdateTaskRequest) => Promise<Task>;
   onDelete: (id: number) => Promise<void>;
-  onCreateTask: (task: CreateTaskRequest) => Promise<void>;
-  onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
+  onCreateTask: (task: CreateTaskRequest) => Promise<Task>;
+  onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<Task>;
+  onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<Task>;
   onNavigateToParent?: (taskId: number) => void;
   onNavigateToChild?: (taskId: number) => void;
   title: string;
@@ -40,6 +41,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
   onDelete,
   onCreateTask,
   onCreateSibling,
+  onCreateSubtask,
   onNavigateToParent,
   onNavigateToChild,
   title,
@@ -55,11 +57,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onDelete,
     onCreateTask,
     onCreateSibling,
-    isTreeView,
+    onCreateSubtask,
     onFormClose,
   });
 
-  const nav = useTaskNavigation(tasks, {
+  const nav = useTaskNavigation(isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks, {
     onNavigateToParent,
     onNavigateToChild,
     editingTask: ops.editingTask,
@@ -74,19 +76,17 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onExpandAll: () => ops.handleExpandAll(tasks),
     onCollapseAll: ops.handleCollapseAll,
     onDeleteTask: (task) => ops.handleDelete(task.id),
+    onStartEdit: ops.handleStartEdit,
     expandedTasks: ops.expandedTasks,
   });
 
-  // Get flat list of visible tasks (for navigation only)
-  // const visibleTasks = isTreeView ? getVisibleTasks(tasks, expandedTasks) : tasks;
-
   // Patch: wrap ops.handleDelete and ops.handleToggleComplete to update focus after removal
   const handleDeleteWithFocus = async (taskId: number) => {
-    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleDelete(taskId);
-    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
         nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
@@ -97,11 +97,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
   };
 
   const handleToggleCompleteWithFocus = async (task: Task) => {
-    const prevVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleToggleComplete(task);
-    const newVisible = getVisibleTasks(tasks, ops.expandedTasks);
+    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
         nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
@@ -116,12 +116,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
       ref={nav.containerRef}
       className="space-y-4 focus:outline-none"
       tabIndex={0}
-      onFocus={() => nav.setIsNavigationActive(true)}
-      onBlur={e => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          nav.setIsNavigationActive(false);
-        }
-      }}
     >
       <div className="flex items-center justify-between">
         <div>

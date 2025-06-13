@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Task, CreateTaskRequest } from '../types/Task';
+import { Task, CreateTaskRequest, UpdateTaskRequest } from '../types/Task';
 
 interface UseTaskOperationsProps {
-  onUpdate: (id: number, updates: any) => Promise<void>;
+  onUpdate: (id: number, updates: UpdateTaskRequest) => Promise<Task>;
   onDelete: (id: number) => Promise<void>;
-  onCreateTask: (task: CreateTaskRequest) => Promise<void>;
-  onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
-  isTreeView?: boolean;
+  onCreateTask: (task: CreateTaskRequest) => Promise<Task>;
+  onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<Task>;
+  onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<Task>;
   onFormClose?: () => void;
 }
 
@@ -15,7 +15,7 @@ export const useTaskOperations = ({
   onDelete,
   onCreateTask,
   onCreateSibling,
-  isTreeView = false,
+  onCreateSubtask,
   onFormClose,
 }: UseTaskOperationsProps) => {
   const [loading, setLoading] = useState<number | null>(null);
@@ -92,7 +92,7 @@ export const useTaskOperations = ({
 
   const handleCreateSubtask = async (parentId: number, task: CreateTaskRequest) => {
     try {
-      await onCreateTask({ ...task, parentId });
+      await onCreateSubtask(parentId, task);
     } catch (error) {
       console.error('Failed to create subtask:', error);
     } finally {

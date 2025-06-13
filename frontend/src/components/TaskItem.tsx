@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Task, UpdateTaskRequest, CreateTaskRequest } from '../types/Task';
+import React, { useRef, useEffect } from 'react';
+import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { getRootTask } from '../utils/taskUtils';
 
@@ -7,7 +7,6 @@ interface TaskItemProps {
   task: Task;
   depth: number;
   selectedTaskId: number | null;
-  setSelectedTaskId: (id: number) => void;
   isNavigationActive: boolean;
   isLoading: boolean;
   isEditing: boolean;
@@ -37,7 +36,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   task,
   depth,
   selectedTaskId,
-  setSelectedTaskId,
   isNavigationActive,
   isLoading,
   isEditing,
