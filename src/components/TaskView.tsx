@@ -61,7 +61,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onFormClose,
   });
 
-  const nav = useTaskNavigation(isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks, {
+  const nav = useTaskNavigation(tasks, {
     onNavigateToParent,
     onNavigateToChild,
     editingTask: ops.editingTask,
