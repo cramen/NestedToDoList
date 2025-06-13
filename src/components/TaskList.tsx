@@ -5,7 +5,6 @@ import { TaskItem } from './TaskItem';
 interface TaskListProps {
   tasks: Task[];
   selectedTaskId: number | null;
-  setSelectedTaskId: (id: number) => void;
   isNavigationActive: boolean;
   loading: number | null;
   editingTaskId: number | null;
@@ -33,7 +32,6 @@ interface TaskListProps {
 export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   selectedTaskId,
-  setSelectedTaskId,
   isNavigationActive,
   loading,
   editingTaskId,

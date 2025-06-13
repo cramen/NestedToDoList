@@ -174,7 +174,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
         <TaskList
           tasks={tasks}
           selectedTaskId={nav.selectedTaskId}
-          setSelectedTaskId={nav.setSelectedTaskId}
           isNavigationActive={nav.isNavigationActive}
           loading={ops.loading}
           editingTaskId={ops.editingTask}
