@@ -16,7 +16,7 @@
   width: 120px;
   height: 150px;
   background-color: #333;
-  border-radius: 60px 60px 80px 80px;
+  border-radius: 80px;
   position: absolute;
   top: 30px;
   left: 40px;
@@ -30,17 +30,17 @@
   background-color: #333;
   border-radius: 50%;
   position: absolute;
-  top: -20px;
+  top: -47px;
   left: 20px;
 }
 
 .penguin-face {
   width: 50px;
-  height: 40px;
+  height: 47px;
   background-color: #fff;
   border-radius: 50%;
   position: absolute;
-  top: 30px;
+  top: 24px;
   left: 15px;
 }
 
@@ -82,12 +82,12 @@
 }
 
 .penguin-wing {
-  width: 35px;
+  width: 40px;
   height: 60px;
   background-color: #333;
-  border-radius: 15px 15px 0 0;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
   position: absolute;
-  top: 70px;
+  top: 49px;
   transform-origin: top center;
   animation: flap 0.5s infinite alternate ease-in-out;
 }
@@ -146,4 +146,4 @@
 .penguin-container.clicked .penguin-body {
   animation: bounce 0.3s ease-out,
              jump 0.5s ease-out; /* Combined with existing bounce, adjust as needed */
-} 
+}
