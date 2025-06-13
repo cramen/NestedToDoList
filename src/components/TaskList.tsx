@@ -27,6 +27,7 @@ interface TaskListProps {
   expandedTasks?: Set<number>;
   onToggleExpand?: (taskId: number) => void;
   allTasks?: Task[];
+  onSelectTask: (taskId: number) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -54,6 +55,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   expandedTasks = new Set(),
   onToggleExpand,
   allTasks = [],
+  onSelectTask,
 }) => {
   const renderTask = (task: Task, depth: number = 0) => {
     const isExpanded = expandedTasks.has(task.id);
@@ -88,6 +90,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           hasChildren={hasChildren}
           onToggleExpand={() => onToggleExpand?.(task.id)}
           allTasks={allTasks}
+          onSelectTask={onSelectTask}
         />
         {isTreeView && isExpanded && task.children && task.children.length > 0 && (
           <div className="ml-4 space-y-2">

@@ -196,6 +196,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
           expandedTasks={ops.expandedTasks}
           onToggleExpand={ops.handleToggleExpand}
           allTasks={allTasks}
+          onSelectTask={nav.setSelectedTaskId}
         />
       )}
     </div>

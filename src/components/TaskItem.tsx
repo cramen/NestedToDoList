@@ -30,6 +30,7 @@ interface TaskItemProps {
   hasChildren?: boolean;
   onToggleExpand?: () => void;
   allTasks?: Task[];
+  onSelectTask: (taskId: number) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -59,6 +60,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   hasChildren = false,
   onToggleExpand,
   allTasks = [],
+  onSelectTask,
 }) => {
   const taskRef = useRef<HTMLDivElement>(null);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
@@ -76,6 +78,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     <div
       ref={taskRef}
       className={`${indentClass} transition-all duration-200`}
+      onClick={() => onSelectTask(task.id)}
     >
       <div
         className={`bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-all ${
