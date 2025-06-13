@@ -14,6 +14,7 @@ function App() {
     error,
     createTask,
     createSiblingTask,
+    createSubtask,
     updateTask,
     deleteTask,
   } = useTasks();
@@ -109,6 +110,7 @@ function App() {
               onDelete={deleteTask}
               onCreateTask={createTask}
               onCreateSibling={createSiblingTask}
+              onCreateSubtask={createSubtask}
               allTasks={tasks}
             />
           ) : (
@@ -118,6 +120,7 @@ function App() {
               onDelete={deleteTask}
               onCreateTask={createTask}
               onCreateSibling={createSiblingTask}
+              onCreateSubtask={createSubtask}
               title="Complete Task Tree"
             />
           )}

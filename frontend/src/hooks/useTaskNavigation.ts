@@ -62,18 +62,16 @@ const getVisibleTasks = (tasks: Task[], expandedTasks: Set<number>): Task[] => {
   const result: Task[] = [];
   
   const traverse = (task: Task) => {
-    if (!task) {
-      console.warn("Skipping null/undefined task in traversal:", task);
-      return;
-    }
+    if (!task) return;
     result.push(task);
     if (Array.isArray(task.children) && task.children.length > 0 && expandedTasks.has(task.id)) {
       task.children.forEach(traverse);
     }
   };
 
-  console.log("DEBUG: tasks before forEach in getVisibleTasks:", tasks);
-  tasks.forEach(traverse);
+  if (Array.isArray(tasks)) {
+    tasks.forEach(traverse);
+  }
   return result;
 };
 
@@ -109,25 +107,18 @@ export function useTaskNavigation(
     onExpandAll?: () => void;
     onCollapseAll?: () => void;
     onDeleteTask?: (task: Task) => void;
+    onStartEdit?: (task: Task) => void;
     expandedTasks?: Set<number>;
   }
 ) {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const [isNavigationActive, setIsNavigationActive] = useState(false);
+  const [isNavigationActive, setIsNavigationActive] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevVisibleTasksRef = useRef<Task[]>([]); // Для отслеживания предыдущего состояния видимых задач
   const prevSelectedTaskIdRef = useRef<number | null>(null); // Для отслеживания предыдущего выбранного ID
 
   // Get flat list of visible tasks
   const visibleTasks = options?.expandedTasks ? getVisibleTasks(tasks, options.expandedTasks) : tasks;
-
-  // Фокусировка на контейнере при монтировании
-  useEffect(() => {
-    if (containerRef.current && tasks.length > 0) {
-      containerRef.current.focus();
-      setIsNavigationActive(true);
-    }
-  }, [tasks.length]);
 
   // Логика выбора активного элемента при изменении видимых задач
   useEffect(() => {
@@ -199,13 +190,26 @@ export function useTaskNavigation(
       ) {
         return;
       }
-      if (!isNavigationActive || visibleTasks.length === 0) return;
-      const currentIndex = visibleTasks.findIndex(t => t.id === selectedTaskId);
-      const selectedTask = currentIndex >= 0 ? visibleTasks[currentIndex] : null;
-      const expandedTasks = options?.expandedTasks;
+      if (!isNavigationActive) return;
 
       // Convert Russian key to English if needed
       const key = RUSSIAN_KEY_MAP[e.key] || e.key;
+
+      // Handle 'N' key specifically, regardless of whether there are visible tasks
+      if (key === 'n' || key === 'N' || key === 'т' || key === 'Т') {
+        e.preventDefault();
+        if (options?.onNewTask) {
+          options.onNewTask();
+        }
+        return; // Important: return after handling 'N' to prevent further processing
+      }
+
+      // For all other keys, require visible tasks
+      if (visibleTasks.length === 0) return;
+
+      const currentIndex = visibleTasks.findIndex(t => t.id === selectedTaskId);
+      const selectedTask = currentIndex >= 0 ? visibleTasks[currentIndex] : null;
+      const expandedTasks = options?.expandedTasks;
 
       switch (key) {
         case 'ArrowUp':
@@ -267,15 +271,6 @@ export function useTaskNavigation(
             options.onToggleComplete(selectedTask);
           }
           break;
-        case 'n':
-        case 'N':
-        case 'т': // Russian 'n'
-        case 'Т': // Russian 'N'
-          e.preventDefault();
-          if (options?.onNewTask) {
-            options.onNewTask();
-          }
-          break;
         case 'c':
         case 'C':
         case 'с': // Russian 'c'
@@ -317,6 +312,15 @@ export function useTaskNavigation(
           e.preventDefault();
           if (selectedTask && options?.onDeleteTask) {
             options.onDeleteTask(selectedTask);
+          }
+          break;
+        case 'e':
+        case 'E':
+        case 'у': // Russian 'e'
+        case 'У': // Russian 'E'
+          e.preventDefault();
+          if (selectedTask && options?.onStartEdit) {
+            options.onStartEdit(selectedTask);
           }
           break;
       }
