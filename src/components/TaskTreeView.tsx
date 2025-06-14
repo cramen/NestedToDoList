@@ -91,7 +91,7 @@ export const TaskTreeView: React.FC<TaskTreeViewProps> = ({
           onSelectTask={onSelectTask}
         />
         {hasChildren && isExpanded && (
-          <div className="ml-4">
+          <div className="ml-4 space-y-2">
             {task.children.map(child => renderTask(child, depth + 1))}
           </div>
         )}
