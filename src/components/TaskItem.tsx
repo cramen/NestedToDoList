@@ -4,6 +4,9 @@ import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { getRootTask } from '../utils/taskUtils';
 import MarkdownRenderer from './MarkdownRenderer';
+import MDEditor, { commands } from '@uiw/react-md-editor';
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
 
 interface TaskItemProps {
   task: Task;
@@ -65,25 +68,8 @@ export const TaskItem = ({
   onSelectTask,
 }: TaskItemProps) => {
   const taskRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
-
-  // Function to adjust textarea height
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  };
-
-  // Adjust height when editing starts or description changes
-  useEffect(() => {
-    if (isEditing) {
-      adjustTextareaHeight();
-    }
-  }, [isEditing, editDescription]);
 
   useEffect(() => {
     if (isNavigationActive && selectedTaskId === task.id && taskRef.current) {
@@ -111,11 +97,11 @@ export const TaskItem = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isEditing) {
         const activeElement = document.activeElement;
-        const isTextarea = activeElement instanceof HTMLTextAreaElement;
+        const isInEditor = activeElement?.closest('.w-md-editor') !== null;
 
         if (e.key === 'Enter') {
-          if (isTextarea) {
-            // В textarea Enter делает перенос строки, Shift+Enter отправляет форму
+          if (isInEditor) {
+            // В редакторе Shift+Enter отправляет форму
             if (e.shiftKey) {
               e.preventDefault();
               if (!isLoading && editTitle.trim()) {
@@ -123,10 +109,12 @@ export const TaskItem = ({
               }
             }
           } else {
-            // В остальных полях Enter отправляет форму
-            e.preventDefault();
-            if (!isLoading && editTitle.trim()) {
-              onSaveEdit();
+            // Вне редактора Enter отправляет форму
+            if (!e.shiftKey) {
+              e.preventDefault();
+              if (!isLoading && editTitle.trim()) {
+                onSaveEdit();
+              }
             }
           }
         } else if (e.key === 'Escape') {
@@ -151,11 +139,6 @@ export const TaskItem = ({
 
   const indentClass = `ml-${Math.min(depth * 4, 16)}`;
   const isSelected = isNavigationActive && selectedTaskId === task.id;
-
-  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setEditDescription(e.target.value);
-    adjustTextareaHeight();
-  };
 
   return (
     <div
@@ -199,21 +182,37 @@ export const TaskItem = ({
                   className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isLoading}
                   autoFocus
+                  tabIndex={1}
                 />
-                <textarea
-                  ref={textareaRef}
+                <MDEditor
                   value={editDescription}
-                  onChange={handleDescriptionChange}
+                  onChange={(val?: string) => setEditDescription(val || '')}
                   placeholder="Description (optional)"
-                  rows={1}
-                  className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
-                  disabled={isLoading}
+                  textareaProps={{
+                    rows: 3,
+                    disabled: isLoading,
+                    tabIndex: 2,
+                  }}
+                  height={Math.max(100, (editDescription?.split('\n').length || 1) * 24)}
+                  preview="edit"
+                  hideToolbar={false}
+                  commands={[
+                    commands.bold,
+                    commands.italic,
+                    commands.unorderedListCommand,
+                    commands.orderedListCommand,
+                    commands.checkedListCommand,
+                    commands.quote,
+                    commands.code,
+                    commands.link,
+                  ]}
                 />
                 <div className="flex gap-2">
                   <button
                     onClick={onSaveEdit}
                     disabled={!editTitle.trim() || isLoading}
                     className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:bg-gray-300"
+                    tabIndex={3}
                   >
                     {isLoading ? 'Saving...' : 'Save'}
                   </button>
@@ -221,6 +220,7 @@ export const TaskItem = ({
                     onClick={onCancelEdit}
                     disabled={isLoading}
                     className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+                    tabIndex={4}
                   >
                     Cancel
                   </button>
