@@ -23,7 +23,7 @@ interface TaskViewProps {
 // Helper function to get flat list of visible tasks
 const getVisibleTasks = (tasks: Task[], expandedTasks: Set<number>): Task[] => {
   const result: Task[] = [];
-  
+
   const traverse = (task: Task) => {
     result.push(task);
     if (task.children && task.children.length > 0 && expandedTasks.has(task.id)) {
@@ -128,7 +128,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
           )}
         </div>
         <div className="flex gap-2">
-          {isTreeView && (
+          {isTreeView && tasks.length > 0 && (
             <>
               <button
                 onClick={() => ops.handleExpandAll(tasks)}
@@ -163,8 +163,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
         <div className="text-center py-8 flex flex-col items-center justify-center">
           <PenguinAnimation />
           <p className="text-lg text-gray-500">Похоже, пока нет задач.</p>
-          <button 
-            onClick={() => ops.setShowNewTaskForm(true)} 
+          <button
+            onClick={() => ops.setShowNewTaskForm(true)}
             className="text-sm text-blue-500 hover:text-blue-700 cursor-pointer mt-2 focus:outline-none"
           >
             Создайте свою первую задачу, чтобы начать!
@@ -201,4 +201,4 @@ export const TaskView: React.FC<TaskViewProps> = ({
       )}
     </div>
   );
-}; 
+};
