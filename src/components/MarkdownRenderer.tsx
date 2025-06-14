@@ -16,7 +16,7 @@ const MarkdownRenderer = ({
   isExpanded = false,
   onToggle 
 }: MarkdownRendererProps) => {
-  const shouldShowExpandButton = maxLines !== undefined;
+  const shouldShowExpandButton = maxLines !== undefined && content.split('\n').length > maxLines;
 
   const handleToggle = () => {
     onToggle?.(!isExpanded);
