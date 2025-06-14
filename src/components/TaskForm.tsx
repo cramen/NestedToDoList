@@ -46,14 +46,29 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check if the event originated from within this form, specifically from its input fields
       if (formRef.current && formRef.current.contains(e.target as Node)) {
+        const activeElement = document.activeElement;
+        const isTextarea = activeElement instanceof HTMLTextAreaElement;
+
         if (e.key === 'Escape') {
           e.preventDefault();
           onCancel(); // Directly call onCancel for Escape key
-        } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-          e.preventDefault();
-          // Only submit if not already loading and title is not empty
-          if (!loading && title.trim()) {
-            handleSubmit(e); // Pass the keyboard event to handleSubmit
+        } else if (e.key === 'Enter') {
+          if (isTextarea) {
+            // В textarea Enter делает перенос строки, Shift+Enter отправляет форму
+            if (e.shiftKey) {
+              e.preventDefault();
+              // Only submit if not already loading and title is not empty
+              if (!loading && title.trim()) {
+                handleSubmit(e); // Pass the keyboard event to handleSubmit
+              }
+            }
+          } else {
+            // В остальных полях Enter отправляет форму
+            e.preventDefault();
+            // Only submit if not already loading and title is not empty
+            if (!loading && title.trim()) {
+              handleSubmit(e); // Pass the keyboard event to handleSubmit
+            }
           }
         }
       }

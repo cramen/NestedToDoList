@@ -106,6 +106,42 @@ export const TaskItem = ({
     }
   }, [isNavigationActive, selectedTaskId, task.id]);
 
+  // Handle edit form keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditing) {
+        const activeElement = document.activeElement;
+        const isTextarea = activeElement instanceof HTMLTextAreaElement;
+
+        if (e.key === 'Enter') {
+          if (isTextarea) {
+            // В textarea Enter делает перенос строки, Shift+Enter отправляет форму
+            if (e.shiftKey) {
+              e.preventDefault();
+              if (!isLoading && editTitle.trim()) {
+                onSaveEdit();
+              }
+            }
+          } else {
+            // В остальных полях Enter отправляет форму
+            e.preventDefault();
+            if (!isLoading && editTitle.trim()) {
+              onSaveEdit();
+            }
+          }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          onCancelEdit();
+        }
+      }
+    };
+
+    if (isEditing) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isEditing, isLoading, editTitle, onSaveEdit, onCancelEdit]);
+
   // Reset expanded state when task is deselected
   useEffect(() => {
     if (!isNavigationActive || selectedTaskId !== task.id) {

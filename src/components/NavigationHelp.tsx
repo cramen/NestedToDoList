@@ -9,6 +9,15 @@ export const NavigationHelp: React.FC<NavigationHelpProps> = ({ isTreeView = fal
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Проверяем, что фокус не находится в поле ввода
+      const activeElement = document.activeElement;
+      const isInputField = activeElement instanceof HTMLInputElement || 
+                          activeElement instanceof HTMLTextAreaElement;
+      
+      if (isInputField) {
+        return; // Игнорируем горячие клавиши, если фокус в поле ввода
+      }
+
       if (e.key.toLowerCase() === 'h' || e.key.toLowerCase() === 'р') {
         e.preventDefault();
         setIsVisible(true);
