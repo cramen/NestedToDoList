@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import type { ChangeEvent } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { getRootTask } from '../utils/taskUtils';
@@ -63,10 +64,27 @@ export const TaskItem = ({
   allTasks = [],
   onSelectTask,
 }: TaskItemProps) => {
-  const taskRef = React.useRef<HTMLDivElement>(null);
+  const taskRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
 
-  React.useEffect(() => {
+  // Function to adjust textarea height
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  // Adjust height when editing starts or description changes
+  useEffect(() => {
+    if (isEditing) {
+      adjustTextareaHeight();
+    }
+  }, [isEditing, editDescription]);
+
+  useEffect(() => {
     if (isNavigationActive && selectedTaskId === task.id && taskRef.current) {
       taskRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -74,6 +92,11 @@ export const TaskItem = ({
 
   const indentClass = `ml-${Math.min(depth * 4, 16)}`;
   const isSelected = isNavigationActive && selectedTaskId === task.id;
+
+  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setEditDescription(e.target.value);
+    adjustTextareaHeight();
+  };
 
   return (
     <div
@@ -119,11 +142,12 @@ export const TaskItem = ({
                   autoFocus
                 />
                 <textarea
+                  ref={textareaRef}
                   value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
+                  onChange={handleDescriptionChange}
                   placeholder="Description (optional)"
-                  rows={2}
-                  className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={1}
+                  className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
                   disabled={isLoading}
                 />
                 <div className="flex gap-2">
