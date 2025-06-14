@@ -181,7 +181,7 @@ export const TaskItem = ({
                 </div>
                 {task.description && (
                   <div className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}>
-                    <MarkdownRenderer content={task.description} />
+                    <MarkdownRenderer content={task.description} maxLines={2} />
                   </div>
                 )}
                 <div className="flex gap-2 mt-2">
