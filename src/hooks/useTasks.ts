@@ -5,6 +5,7 @@ import { storageService } from '../services/storage';
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [deepestTasks, setDeepestTasks] = useState<Task[]>([]);
+  const [allTasksFlat, setAllTasksFlat] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,10 +82,12 @@ export const useTasks = () => {
   useEffect(() => {
     try {
       const loadedTasks = storageService.getAllTasks();
-      console.log('Loaded tasks from localStorage:', loadedTasks);
+      console.log('useTasks: Loaded tasks from localStorage (flat):', loadedTasks);
       const taskTree = buildTaskTree(loadedTasks);
+      console.log('useTasks: Built task tree:', taskTree);
       setTasks(taskTree);
       setDeepestTasks(findDeepestTasks(loadedTasks));
+      setAllTasksFlat(loadedTasks);
     } catch (err) {
       setError('Failed to load tasks');
       console.error('Error loading tasks:', err);
@@ -129,6 +132,7 @@ export const useTasks = () => {
       const taskTree = buildTaskTree(allTasks);
       setTasks(taskTree);
       setDeepestTasks(findDeepestTasks(allTasks));
+      setAllTasksFlat(allTasks);
       return newTask;
     } catch (err) {
       setError('Failed to create task');
@@ -217,6 +221,7 @@ export const useTasks = () => {
       const finalTaskTree = buildTaskTree(finalAllTasks);
       setTasks(finalTaskTree);
       setDeepestTasks(findDeepestTasks(finalAllTasks));
+      setAllTasksFlat(finalAllTasks);
       return updatedTask;
     } catch (err) {
       setError('Failed to update task');
@@ -235,6 +240,7 @@ export const useTasks = () => {
       const taskTree = buildTaskTree(allTasks);
       setTasks(taskTree);
       setDeepestTasks(findDeepestTasks(allTasks));
+      setAllTasksFlat(allTasks);
     } catch (err) {
       setError('Failed to delete task');
       console.error('Error deleting task:', err);
@@ -250,11 +256,23 @@ export const useTasks = () => {
     if (!parentTask) {
       throw new Error('Parent task not found');
     }
-    return createTask({ ...task, parentId: parentTask.parentId });
+    const newTask = await createTask({ ...task, parentId: parentTask.parentId });
+    const finalAllTasks = storageService.getAllTasks();
+    const finalTaskTree = buildTaskTree(finalAllTasks);
+    setTasks(finalTaskTree);
+    setDeepestTasks(findDeepestTasks(finalAllTasks));
+    setAllTasksFlat(finalAllTasks);
+    return newTask;
   };
 
   const createSubtask = async (parentId: number, task: CreateTaskRequest): Promise<Task> => {
-    return createTask({ ...task, parentId });
+    const newTask = await createTask({ ...task, parentId });
+    const finalAllTasks = storageService.getAllTasks();
+    const finalTaskTree = buildTaskTree(finalAllTasks);
+    setTasks(finalTaskTree);
+    setDeepestTasks(findDeepestTasks(finalAllTasks));
+    setAllTasksFlat(finalAllTasks);
+    return newTask;
   };
 
   return {
@@ -263,9 +281,10 @@ export const useTasks = () => {
     loading,
     error,
     createTask,
+    createSiblingTask,
+    createSubtask,
     updateTask,
     deleteTask,
-    createSiblingTask,
-    createSubtask
+    allTasksFlat,
   };
 };

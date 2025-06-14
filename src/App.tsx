@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { TaskTree } from './components/TaskTree';
-import { DeepestTasks } from './components/DeepestTasks';
 import { useTasks } from './hooks/useTasks';
+import { TaskView } from './components/TaskView';
 
 type ViewMode = 'deepest' | 'tree';
 
@@ -17,6 +16,7 @@ function App() {
     createSubtask,
     updateTask,
     deleteTask,
+    allTasksFlat,
   } = useTasks();
 
   useEffect(() => {
@@ -112,27 +112,18 @@ function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          {viewMode === 'deepest' ? (
-            <DeepestTasks
-              tasks={deepestTasks}
-              onUpdate={updateTask}
-              onDelete={deleteTask}
-              onCreateTask={createTask}
-              onCreateSibling={createSiblingTask}
-              onCreateSubtask={createSubtask}
-              allTasks={tasks}
-            />
-          ) : (
-            <TaskTree
-              tasks={tasks}
-              onUpdate={updateTask}
-              onDelete={deleteTask}
-              onCreateTask={createTask}
-              onCreateSibling={createSiblingTask}
-              onCreateSubtask={createSubtask}
-              title="Complete Task Tree"
-            />
-          )}
+          <TaskView
+            tasks={viewMode === 'deepest' ? deepestTasks : tasks}
+            onUpdate={updateTask}
+            onDelete={deleteTask}
+            onCreateTask={createTask}
+            onCreateSibling={createSiblingTask}
+            onCreateSubtask={createSubtask}
+            title={viewMode === 'deepest' ? "Deepest Tasks" : "Complete Task Tree"}
+            isTreeView={viewMode === 'tree'}
+            allTasks={allTasksFlat}
+            onSetViewMode={setViewMode}
+          />
         </div>
       </main>
     </div>

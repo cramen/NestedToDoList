@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { TaskList } from './TaskList';
+import { TaskTreeView } from './TaskTreeView';
 import { useTaskNavigation } from '../hooks/useTaskNavigation';
 import { useTaskOperations } from '../hooks/useTaskOperations';
 import { PenguinAnimation } from './PenguinAnimation';
 import { NavigationHelp } from './NavigationHelp';
+import { SearchModal } from './SearchModal';
+import { useSearchModal } from '../hooks/useSearchModal';
 
 interface TaskViewProps {
   tasks: Task[];
@@ -17,8 +20,9 @@ interface TaskViewProps {
   onNavigateToParent?: (taskId: number) => void;
   onNavigateToChild?: (taskId: number) => void;
   title: string;
-  isTreeView?: boolean;
+  isTreeView: boolean;
   allTasks?: Task[];
+  onSetViewMode: (mode: 'deepest' | 'tree') => void;
 }
 
 // Helper function to get flat list of visible tasks
@@ -46,9 +50,14 @@ export const TaskView: React.FC<TaskViewProps> = ({
   onNavigateToParent,
   onNavigateToChild,
   title,
-  isTreeView = false,
+  isTreeView,
   allTasks = [],
+  onSetViewMode,
 }) => {
+  console.log('TaskView rendered. isTreeView (prop):', isTreeView, 'tasks.length:', tasks.length, 'allTasks.length:', allTasks.length);
+  const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
+  const { isOpen: isSearchOpen, openModal: openSearch, closeModal: closeSearch } = useSearchModal();
+
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
   };
@@ -126,12 +135,83 @@ export const TaskView: React.FC<TaskViewProps> = ({
     }
   };
 
+  const handleSearchSelect = (taskId: number) => {
+    // Request App.tsx to switch to tree view
+    onSetViewMode('tree');
+    console.log('handleSearchSelect called. Requested tree view, taskId:', taskId);
+
+    // Set taskToSelectAfterTreeSwitchRef immediately
+    taskToSelectAfterTreeSwitchRef.current = taskId;
+  };
+
+  // useEffect to handle task selection and expansion after tree view is active
+  useEffect(() => {
+    console.log('--- useEffect (task selection/expansion) triggered ---');
+    console.log('Dependencies state:');
+    console.log('  isTreeView:', isTreeView);
+    console.log('  taskToSelectAfterTreeSwitchRef.current:', taskToSelectAfterTreeSwitchRef.current);
+    console.log('  allTasks length:', allTasks.length);
+
+    if (isTreeView && taskToSelectAfterTreeSwitchRef.current !== null) {
+      const taskId = taskToSelectAfterTreeSwitchRef.current;
+      console.log('  Condition met: Proceeding with task selection and expansion for taskId:', taskId);
+
+      // Найти цепочку родителей
+      const newExpandedTasks = new Set<number>();
+      let currentTask = allTasks.find(t => t.id === taskId);
+      while (currentTask && currentTask.parentId !== undefined) {
+        newExpandedTasks.add(currentTask.parentId);
+        currentTask = allTasks.find(t => t.id === currentTask.parentId);
+      }
+      // Если у выбранной задачи есть дети, раскрыть и ее
+      const selectedTask = allTasks.find(t => t.id === taskId);
+      if (selectedTask && selectedTask.children && selectedTask.children.length > 0) {
+        newExpandedTasks.add(taskId);
+      }
+
+      ops.setExpandedTasks(newExpandedTasks);
+      console.log('  Updated expandedTasks state with:', newExpandedTasks);
+
+      nav.setSelectedTaskId(taskId);
+      console.log('  Selected task ID for navigation (in useEffect):', taskId);
+
+      taskToSelectAfterTreeSwitchRef.current = null;
+      console.log('  taskToSelectAfterTreeSwitchRef.current cleared to null after processing.');
+    } else {
+      console.log('  Condition NOT met. isTreeView:', isTreeView, 'taskToSelectAfterTreeSwitchRef.current:', taskToSelectAfterTreeSwitchRef.current);
+    }
+  }, [isTreeView, allTasks, ops, nav]);
+
+  const handleCreateSibling = async (taskId: number, task: CreateTaskRequest): Promise<Task> => {
+    await ops.handleCreateSibling(taskId, task);
+    return allTasks.find(t => t.id === taskId)!;
+  };
+
+  const handleCreateSubtask = async (parentId: number, task: CreateTaskRequest): Promise<Task> => {
+    await ops.handleCreateSubtask(parentId, task);
+    return allTasks.find(t => t.id === parentId)!;
+  };
+
+  const handleToggleComplete = async (task: Task) => {
+    await handleToggleCompleteWithFocus(task);
+  };
+
+  const handleSaveEdit = async (taskId: number) => {
+    await ops.handleSaveEdit(taskId);
+  };
+
   return (
     <div
       ref={nav.containerRef}
       className="space-y-4 focus:outline-none"
       tabIndex={0}
     >
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={closeSearch}
+        allTasks={allTasks}
+        onSelectTask={handleSearchSelect}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
@@ -140,6 +220,12 @@ export const TaskView: React.FC<TaskViewProps> = ({
           )}
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => onSetViewMode(isTreeView ? 'deepest' : 'tree')}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <i className={`fas fa-${isTreeView ? 'list' : 'sitemap'}`}></i> {isTreeView ? 'List View' : 'Tree View'}
+          </button>
           {isTreeView && tasks.length > 0 && (
             <>
               <button
@@ -182,6 +268,33 @@ export const TaskView: React.FC<TaskViewProps> = ({
             Создайте свою первую задачу, чтобы начать!
           </button>
         </div>
+      ) : isTreeView ? (
+        <TaskTreeView
+          tasks={tasks}
+          selectedTaskId={nav.selectedTaskId}
+          isNavigationActive={nav.isNavigationActive}
+          loading={ops.loading}
+          editingTaskId={ops.editingTask}
+          editTitle={ops.editTitle}
+          editDescription={ops.editDescription}
+          setEditTitle={ops.setEditTitle}
+          setEditDescription={ops.setEditDescription}
+          onToggleComplete={handleToggleComplete}
+          onStartEdit={ops.handleStartEdit}
+          onDelete={handleDeleteWithFocus}
+          onCreateSibling={ops.handleCreateSibling}
+          onCreateSubtask={ops.handleCreateSubtask}
+          onSaveEdit={handleSaveEdit}
+          onCancelEdit={ops.handleCancelEdit}
+          showSiblingFormId={ops.showSiblingForm}
+          setShowSiblingFormId={ops.setShowSiblingForm}
+          showSubtaskFormId={ops.showSubtaskForm}
+          setShowSubtaskFormId={ops.setShowSubtaskForm}
+          expandedTasks={ops.expandedTasks}
+          onToggleExpand={ops.handleToggleExpand}
+          allTasks={allTasks}
+          onSelectTask={nav.setSelectedTaskId}
+        />
       ) : (
         <TaskList
           tasks={tasks}
@@ -193,20 +306,17 @@ export const TaskView: React.FC<TaskViewProps> = ({
           editDescription={ops.editDescription}
           setEditTitle={ops.setEditTitle}
           setEditDescription={ops.setEditDescription}
-          onToggleComplete={handleToggleCompleteWithFocus}
+          onToggleComplete={handleToggleComplete}
           onStartEdit={ops.handleStartEdit}
           onDelete={handleDeleteWithFocus}
           onCreateSibling={ops.handleCreateSibling}
           onCreateSubtask={ops.handleCreateSubtask}
-          onSaveEdit={ops.handleSaveEdit}
+          onSaveEdit={handleSaveEdit}
           onCancelEdit={ops.handleCancelEdit}
           showSiblingFormId={ops.showSiblingForm}
           setShowSiblingFormId={ops.setShowSiblingForm}
           showSubtaskFormId={ops.showSubtaskForm}
           setShowSubtaskFormId={ops.setShowSubtaskForm}
-          isTreeView={isTreeView}
-          expandedTasks={ops.expandedTasks}
-          onToggleExpand={ops.handleToggleExpand}
           allTasks={allTasks}
           onSelectTask={nav.setSelectedTaskId}
         />

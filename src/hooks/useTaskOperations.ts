@@ -127,6 +127,15 @@ export const useTaskOperations = ({
     setExpandedTasks(newExpanded);
   };
 
+  const handleExpandTask = (taskId: number) => {
+    console.log('handleExpandTask: called for taskId', taskId);
+    setExpandedTasks(prev => {
+      const newExpanded = new Set(prev).add(taskId);
+      console.log('handleExpandTask: new expandedTasks state', newExpanded);
+      return newExpanded;
+    });
+  };
+
   const handleExpandAll = (tasks: Task[]) => {
     const allTaskIds = new Set<number>();
     const collectTaskIds = (taskList: Task[]) => {
@@ -169,7 +178,9 @@ export const useTaskOperations = ({
     handleNewTaskSubmit,
     handleNewTaskCancel,
     handleToggleExpand,
+    handleExpandTask,
     handleExpandAll,
     handleCollapseAll,
+    setExpandedTasks,
   };
 }; 

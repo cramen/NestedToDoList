@@ -79,6 +79,9 @@ export const NavigationHelp: React.FC<NavigationHelpProps> = ({ isTreeView = fal
             <div className="font-medium">=</div>
             <div>Expand/collapse description</div>
             
+            <div className="font-medium">Cmd+F / Ctrl+F</div>
+            <div>Search tasks</div>
+            
             {isTreeView && (
               <>
                 <div className="font-medium">X</div>
