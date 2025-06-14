@@ -174,8 +174,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
     await handleToggleCompleteWithFocus(task);
   };
 
-  const handleSaveEdit = async (taskId: number) => {
-    await ops.handleSaveEdit(taskId);
+  const handleSaveEdit = async (taskId: number, title: string, description: string) => {
+    await ops.handleSaveEdit(taskId, title, description);
   };
 
   return (

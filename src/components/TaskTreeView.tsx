@@ -17,7 +17,7 @@ interface TaskTreeViewProps {
   onDelete: (taskId: number) => Promise<void>;
   onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
   onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<void>;
-  onSaveEdit: (taskId: number) => Promise<void>;
+  onSaveEdit: (taskId: number, title: string, description: string) => Promise<void>;
   onCancelEdit: () => void;
   showSiblingFormId: number | null;
   setShowSiblingFormId: (id: number | null) => void;
@@ -75,7 +75,7 @@ export const TaskTreeView: React.FC<TaskTreeViewProps> = ({
           onToggleComplete={() => onToggleComplete(task)}
           onStartEdit={() => onStartEdit(task)}
           onDelete={() => onDelete(task.id)}
-          onSaveEdit={() => onSaveEdit(task.id)}
+          onSaveEdit={(title, description) => onSaveEdit(task.id, title, description)}
           onCancelEdit={onCancelEdit}
           showSiblingForm={showSiblingFormId === task.id ? task.id : null}
           setShowSiblingForm={setShowSiblingFormId}

@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
+import { TaskFormBase } from './TaskFormBase';
 import { getRootTask } from '../utils/taskUtils';
 import MarkdownRenderer from './MarkdownRenderer';
 import MDEditor, { commands } from '@uiw/react-md-editor';
@@ -22,7 +23,7 @@ interface TaskItemProps {
   onToggleComplete: () => Promise<void>;
   onStartEdit: () => void;
   onDelete: () => Promise<void>;
-  onSaveEdit: () => Promise<void>;
+  onSaveEdit: (title: string, description: string) => Promise<void>;
   onCancelEdit: () => void;
   showSiblingForm: number | null;
   setShowSiblingForm: (id: number | null) => void;
@@ -105,7 +106,7 @@ export const TaskItem = ({
             if (e.shiftKey) {
               e.preventDefault();
               if (!isLoading && editTitle.trim()) {
-                onSaveEdit();
+                onSaveEdit(editTitle, editDescription);
               }
             }
           } else {
@@ -113,7 +114,7 @@ export const TaskItem = ({
             if (!e.shiftKey) {
               e.preventDefault();
               if (!isLoading && editTitle.trim()) {
-                onSaveEdit();
+                onSaveEdit(editTitle, editDescription);
               }
             }
           }
@@ -128,7 +129,7 @@ export const TaskItem = ({
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isEditing, isLoading, editTitle, onSaveEdit, onCancelEdit]);
+  }, [isEditing, isLoading, editTitle, editDescription, onSaveEdit, onCancelEdit]);
 
   // Reset expanded state when task is deselected
   useEffect(() => {
@@ -174,58 +175,18 @@ export const TaskItem = ({
           {/* Task content */}
           <div className="flex-1">
             {isEditing ? (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={isLoading}
-                  autoFocus
-                  tabIndex={1}
-                />
-                <MDEditor
-                  value={editDescription}
-                  onChange={(val?: string) => setEditDescription(val || '')}
-                  placeholder="Description (optional)"
-                  textareaProps={{
-                    rows: 3,
-                    disabled: isLoading,
-                    tabIndex: 2,
-                  }}
-                  height={Math.max(100, (editDescription?.split('\n').length || 1) * 24)}
-                  preview="edit"
-                  hideToolbar={false}
-                  commands={[
-                    commands.bold,
-                    commands.italic,
-                    commands.unorderedListCommand,
-                    commands.orderedListCommand,
-                    commands.checkedListCommand,
-                    commands.quote,
-                    commands.code,
-                    commands.link,
-                  ]}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={onSaveEdit}
-                    disabled={!editTitle.trim() || isLoading}
-                    className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:bg-gray-300"
-                    tabIndex={3}
-                  >
-                    {isLoading ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={onCancelEdit}
-                    disabled={isLoading}
-                    className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
-                    tabIndex={4}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+              <TaskFormBase
+                onSubmit={async (taskData) => {
+                  setEditTitle(taskData.title);
+                  setEditDescription(taskData.description || '');
+                  await onSaveEdit(taskData.title, taskData.description || '');
+                }}
+                onCancel={onCancelEdit}
+                initialTitle={editTitle}
+                initialDescription={editDescription}
+                submitButtonText="Save"
+                loadingButtonText="Saving..."
+              />
             ) : (
               <div>
                 <div className="flex items-center gap-2">

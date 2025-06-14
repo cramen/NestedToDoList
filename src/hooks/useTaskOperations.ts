@@ -44,15 +44,17 @@ export const useTaskOperations = ({
     setEditDescription(task.description || '');
   };
 
-  const handleSaveEdit = async (taskId: number) => {
-    if (!editTitle.trim()) return;
+  const handleSaveEdit = async (taskId: number, title: string, description: string) => {
+    if (!title.trim()) return;
     setLoading(taskId);
     try {
       await onUpdate(taskId, {
-        title: editTitle.trim(),
-        description: editDescription.trim() || undefined,
+        title: title.trim(),
+        description: description.trim() || undefined,
       });
       setEditingTask(null);
+      setEditTitle('');
+      setEditDescription('');
     } catch (error) {
       console.error('Failed to update task:', error);
     } finally {
