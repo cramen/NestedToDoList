@@ -56,7 +56,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
 }) => {
   console.log('TaskView rendered. isTreeView (prop):', isTreeView, 'tasks.length:', tasks.length, 'allTasks.length:', allTasks.length);
   const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
-  const { isOpen: isSearchOpen, openModal: openSearch, closeModal: closeSearch } = useSearchModal();
+  const { isOpen: isSearchOpen, closeModal: closeSearch } = useSearchModal();
 
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
@@ -161,7 +161,9 @@ export const TaskView: React.FC<TaskViewProps> = ({
       let currentTask = allTasks.find(t => t.id === taskId);
       while (currentTask && currentTask.parentId !== undefined) {
         newExpandedTasks.add(currentTask.parentId);
-        currentTask = allTasks.find(t => t.id === currentTask.parentId);
+        const parentTask = allTasks.find(t => t.id === currentTask?.parentId);
+        if (!parentTask) break;
+        currentTask = parentTask;
       }
       // Если у выбранной задачи есть дети, раскрыть и ее
       const selectedTask = allTasks.find(t => t.id === taskId);
@@ -181,16 +183,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
       console.log('  Condition NOT met. isTreeView:', isTreeView, 'taskToSelectAfterTreeSwitchRef.current:', taskToSelectAfterTreeSwitchRef.current);
     }
   }, [isTreeView, allTasks, ops, nav]);
-
-  const handleCreateSibling = async (taskId: number, task: CreateTaskRequest): Promise<Task> => {
-    await ops.handleCreateSibling(taskId, task);
-    return allTasks.find(t => t.id === taskId)!;
-  };
-
-  const handleCreateSubtask = async (parentId: number, task: CreateTaskRequest): Promise<Task> => {
-    await ops.handleCreateSubtask(parentId, task);
-    return allTasks.find(t => t.id === parentId)!;
-  };
 
   const handleToggleComplete = async (task: Task) => {
     await handleToggleCompleteWithFocus(task);
