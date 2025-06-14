@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { getRootTask } from '../utils/taskUtils';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface TaskItemProps {
   task: Task;
@@ -33,7 +34,7 @@ interface TaskItemProps {
   onSelectTask: (taskId: number) => void;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({
+export const TaskItem = ({
   task,
   depth,
   selectedTaskId,
@@ -61,11 +62,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onToggleExpand,
   allTasks = [],
   onSelectTask,
-}) => {
-  const taskRef = useRef<HTMLDivElement>(null);
+}: TaskItemProps) => {
+  const taskRef = React.useRef<HTMLDivElement>(null);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isNavigationActive && selectedTaskId === task.id && taskRef.current) {
       taskRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -155,9 +156,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   )}
                 </div>
                 {task.description && (
-                  <p className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}>
-                    {task.description}
-                  </p>
+                  <div className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}>
+                    <MarkdownRenderer content={task.description} />
+                  </div>
                 )}
                 <div className="flex gap-2 mt-2">
                   <button
@@ -200,7 +201,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                       await onCreateSubtask(task.id, subtask);
                     }}
                     onCancel={() => setShowSubtaskForm(null)}
-                    parentId={task.id}
                     placeholder="Enter subtask title..."
                   />
                 )}
