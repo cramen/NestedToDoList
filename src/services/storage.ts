@@ -31,7 +31,27 @@ export const storageService = {
 
   deleteTask: (taskId: number): void => {
     const tasks = storageService.getAllTasks();
-    const filteredTasks = tasks.filter(t => t.id !== taskId);
+    
+    // Функция для рекурсивного сбора ID всех подзадач
+    const collectSubtaskIds = (parentId: number, ids: Set<number>): void => {
+      // Находим все задачи, у которых parentId совпадает с текущим
+      const subtasks = tasks.filter(t => t.parentId === parentId);
+      
+      // Добавляем ID найденных подзадач в набор
+      subtasks.forEach(subtask => {
+        ids.add(subtask.id);
+        // Рекурсивно ищем подзадачи для каждой найденной подзадачи
+        collectSubtaskIds(subtask.id, ids);
+      });
+    };
+
+    // Собираем ID всех подзадач
+    const idsToDelete = new Set<number>();
+    idsToDelete.add(taskId); // Добавляем ID самой удаляемой задачи
+    collectSubtaskIds(taskId, idsToDelete);
+
+    // Удаляем задачу и все её подзадачи
+    const filteredTasks = tasks.filter(t => !idsToDelete.has(t.id));
     storageService.saveTasks(filteredTasks);
   },
 
