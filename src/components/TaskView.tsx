@@ -87,18 +87,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleDelete(taskId);
     const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-    
-    // Если задача была удалена, выбираем предыдущую задачу или первую, если предыдущей нет
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
-        // Выбираем предыдущую задачу
-        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? null);
-      } else if (newVisible.length > 0) {
-        // Если удалена первая задача, выбираем новую первую
-        nav.setSelectedTaskId(newVisible[0].id);
+        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
       } else {
-        // Если больше нет задач, сбрасываем выбор
-        nav.setSelectedTaskId(null);
+        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
       }
     }
   };
@@ -109,18 +102,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
     await ops.handleToggleComplete(task);
     const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-    
-    // Если задача скрылась (была выполнена), выбираем предыдущую задачу или первую, если предыдущей нет
     if (!newVisible.some(t => t.id === prevSelected)) {
       if (prevIndex > 0) {
-        // Выбираем предыдущую задачу
-        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? null);
-      } else if (newVisible.length > 0) {
-        // Если скрылась первая задача, выбираем новую первую
-        nav.setSelectedTaskId(newVisible[0].id);
+        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
       } else {
-        // Если больше нет задач, сбрасываем выбор
-        nav.setSelectedTaskId(null);
+        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
       }
     }
   };
