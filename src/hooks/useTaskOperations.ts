@@ -128,10 +128,8 @@ export const useTaskOperations = ({
   };
 
   const handleExpandTask = (taskId: number) => {
-    console.log('handleExpandTask: called for taskId', taskId);
     setExpandedTasks(prev => {
       const newExpanded = new Set(prev).add(taskId);
-      console.log('handleExpandTask: new expandedTasks state', newExpanded);
       return newExpanded;
     });
   };

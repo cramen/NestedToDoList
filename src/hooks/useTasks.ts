@@ -82,9 +82,7 @@ export const useTasks = () => {
   useEffect(() => {
     try {
       const loadedTasks = storageService.getAllTasks();
-      console.log('useTasks: Loaded tasks from localStorage (flat):', loadedTasks);
       const taskTree = buildTaskTree(loadedTasks);
-      console.log('useTasks: Built task tree:', taskTree);
       setTasks(taskTree);
       setDeepestTasks(findDeepestTasks(loadedTasks));
       setAllTasksFlat(loadedTasks);

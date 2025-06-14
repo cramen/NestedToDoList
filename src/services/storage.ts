@@ -4,17 +4,15 @@ const STORAGE_KEY = 'tasks';
 
 export const storageService = {
   getAllTasks: (): Task[] => {
-    const tasks = localStorage.getItem(STORAGE_KEY);
-    return tasks ? JSON.parse(tasks) : [];
+    const tasksJson = localStorage.getItem(STORAGE_KEY);
+    return tasksJson ? JSON.parse(tasksJson) : [];
   },
 
   saveTasks: (tasks: Task[]): void => {
-    console.log('Saving tasks to localStorage:', tasks);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   },
 
   addTask: (task: Task): void => {
-    console.log('Adding task to localStorage:', task);
     const tasks = storageService.getAllTasks();
     tasks.push(task);
     storageService.saveTasks(tasks);

@@ -54,7 +54,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
   allTasks = [],
   onSetViewMode,
 }) => {
-  console.log('TaskView rendered. isTreeView (prop):', isTreeView, 'tasks.length:', tasks.length, 'allTasks.length:', allTasks.length);
   const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
   const { isOpen: isSearchOpen, closeModal: closeSearch } = useSearchModal();
 
@@ -138,7 +137,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
   const handleSearchSelect = (taskId: number) => {
     // Request App.tsx to switch to tree view
     onSetViewMode('tree');
-    console.log('handleSearchSelect called. Requested tree view, taskId:', taskId);
 
     // Set taskToSelectAfterTreeSwitchRef immediately
     taskToSelectAfterTreeSwitchRef.current = taskId;
@@ -146,15 +144,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
   // useEffect to handle task selection and expansion after tree view is active
   useEffect(() => {
-    console.log('--- useEffect (task selection/expansion) triggered ---');
-    console.log('Dependencies state:');
-    console.log('  isTreeView:', isTreeView);
-    console.log('  taskToSelectAfterTreeSwitchRef.current:', taskToSelectAfterTreeSwitchRef.current);
-    console.log('  allTasks length:', allTasks.length);
-
     if (isTreeView && taskToSelectAfterTreeSwitchRef.current !== null) {
       const taskId = taskToSelectAfterTreeSwitchRef.current;
-      console.log('  Condition met: Proceeding with task selection and expansion for taskId:', taskId);
 
       // Найти цепочку родителей
       const newExpandedTasks = new Set<number>();
@@ -172,15 +163,10 @@ export const TaskView: React.FC<TaskViewProps> = ({
       }
 
       ops.setExpandedTasks(newExpandedTasks);
-      console.log('  Updated expandedTasks state with:', newExpandedTasks);
 
       nav.setSelectedTaskId(taskId);
-      console.log('  Selected task ID for navigation (in useEffect):', taskId);
 
       taskToSelectAfterTreeSwitchRef.current = null;
-      console.log('  taskToSelectAfterTreeSwitchRef.current cleared to null after processing.');
-    } else {
-      console.log('  Condition NOT met. isTreeView:', isTreeView, 'taskToSelectAfterTreeSwitchRef.current:', taskToSelectAfterTreeSwitchRef.current);
     }
   }, [isTreeView, allTasks, ops, nav]);
 
