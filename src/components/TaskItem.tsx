@@ -71,6 +71,7 @@ export const TaskItem = ({
   const taskRef = useRef<HTMLDivElement>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
+  const markdownRendererRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isNavigationActive && selectedTaskId === task.id && taskRef.current) {
@@ -78,20 +79,92 @@ export const TaskItem = ({
     }
   }, [selectedTaskId, isNavigationActive, task.id]);
 
+  // Handle description expand/collapse and scroll behavior
+  useEffect(() => {
+    const currentMarkdownElement = markdownRendererRef.current;
+    if (currentMarkdownElement) {
+      if (isDescriptionExpanded) {
+        // Calculate dynamic maxHeight and scroll into view on expand
+        const taskRect = taskRef.current?.getBoundingClientRect();
+        if (taskRect) {
+          const availableHeight = window.innerHeight - taskRect.top - 40; // 40px padding from bottom
+          currentMarkdownElement.style.maxHeight = `${Math.max(200, availableHeight)}px`; // Min height of 200px
+          currentMarkdownElement.style.overflowY = 'auto';
+
+          // Scroll task into view to align with viewport top
+          window.scrollTo({
+            top: window.scrollY + taskRect.top - 20, // 20px padding from top
+            behavior: 'smooth'
+          });
+        }
+      } else {
+        // Reset styles and scroll to top on collapse
+        currentMarkdownElement.style.overflowY = 'visible';
+        currentMarkdownElement.style.maxHeight = '';
+        currentMarkdownElement.scrollTop = 0; // Scroll to top on collapse
+      }
+    }
+  }, [isDescriptionExpanded, task.id]);
+
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isNavigationActive && selectedTaskId === task.id && e.key === '=') {
-        e.preventDefault();
-        setIsDescriptionExpanded(prev => !prev);
+      if (isNavigationActive && selectedTaskId === task.id) {
+        // Обработчик для прокрутки описания
+        const descriptionScrollElement = markdownRendererRef.current; 
+
+        if (descriptionScrollElement && isDescriptionExpanded) {
+          const { scrollTop, scrollHeight, clientHeight } = descriptionScrollElement;
+          const scrollStep = 30; 
+
+          if (e.key === 'ArrowUp') {
+            console.log('ArrowUp pressed.');
+            console.log('ScrollTop:', scrollTop, 'ScrollHeight:', scrollHeight, 'ClientHeight:', clientHeight);
+            if (scrollTop > 0) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              descriptionScrollElement.scrollTop -= scrollStep;
+              console.log('Scrolling up. New scrollTop:', descriptionScrollElement.scrollTop);
+              return; 
+            } else {
+              console.log('At top, allowing default navigation.');
+            }
+          } else if (e.key === 'ArrowDown') {
+            console.log('ArrowDown pressed.');
+            console.log('ScrollTop:', scrollTop, 'ScrollHeight:', scrollHeight, 'ClientHeight:', clientHeight);
+            if (scrollTop + clientHeight < scrollHeight) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              descriptionScrollElement.scrollTop += scrollStep;
+              console.log('Scrolling down. New scrollTop:', descriptionScrollElement.scrollTop);
+              return; 
+            } else {
+              console.log('At bottom, allowing default navigation.');
+            }
+          }
+        }
+
+        // Обработчик для разворачивания/сворачивания описания
+        if (e.key === '=') {
+          e.preventDefault();
+          setIsDescriptionExpanded(prev => !prev);
+          return; 
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          setIsDescriptionExpanded(false);
+          return;
+        }
       }
     };
 
     if (isNavigationActive && selectedTaskId === task.id) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      window.addEventListener('keydown', handleKeyDown, true);
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown, true);
+      };
     }
-  }, [isNavigationActive, selectedTaskId, task.id]);
+  }, [isNavigationActive, selectedTaskId, task.id, isDescriptionExpanded]);
 
   // Handle edit form keyboard events
   useEffect(() => {
@@ -200,12 +273,17 @@ export const TaskItem = ({
                   )}
                 </div>
                 {task.description && (
-                  <div className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}>
+                  <div 
+                    className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}
+                  >
                     <MarkdownRenderer 
+                      ref={markdownRendererRef}
                       content={task.description} 
                       maxLines={2} 
                       isExpanded={isDescriptionExpanded}
                       onToggle={setIsDescriptionExpanded}
+                      scrollMaxHeight={isDescriptionExpanded ? `${Math.max(200, window.innerHeight - (taskRef.current?.getBoundingClientRect().top || 0) - 40)}px` : undefined}
+                      scrollOverflowY={isDescriptionExpanded ? 'auto' : undefined}
                     />
                   </div>
                 )}

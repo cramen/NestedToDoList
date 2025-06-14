@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import React, { forwardRef, Ref } from 'react';
 import '../markdown.css';
 
 interface MarkdownRendererProps {
@@ -7,25 +8,39 @@ interface MarkdownRendererProps {
   maxLines?: number;
   isExpanded?: boolean;
   onToggle?: (isExpanded: boolean) => void;
+  scrollMaxHeight?: string;
+  scrollOverflowY?: 'auto' | 'visible';
 }
 
-const MarkdownRenderer = ({ 
+const MarkdownRenderer = forwardRef(({ 
   content, 
   className = '', 
   maxLines, 
   isExpanded = false,
-  onToggle 
-}: MarkdownRendererProps) => {
+  onToggle,
+  scrollMaxHeight,
+  scrollOverflowY
+}: MarkdownRendererProps, ref: Ref<HTMLDivElement>) => {
   const shouldShowExpandButton = maxLines !== undefined && content.split('\n').length > maxLines;
 
   const handleToggle = () => {
     onToggle?.(!isExpanded);
   };
 
+  const divStyle: React.CSSProperties = {};
+  if (scrollMaxHeight) {
+    divStyle.maxHeight = scrollMaxHeight;
+  }
+  if (scrollOverflowY) {
+    divStyle.overflowY = scrollOverflowY;
+  }
+
   return (
     <div className={`markdown-content ${className}`}>
       <div 
+        ref={ref}
         className={`${shouldShowExpandButton && !isExpanded ? 'line-clamp-2' : ''}`}
+        style={divStyle}
       >
         <ReactMarkdown>
           {content}
@@ -41,6 +56,6 @@ const MarkdownRenderer = ({
       )}
     </div>
   );
-};
+});
 
 export default MarkdownRenderer; 
