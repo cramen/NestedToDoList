@@ -121,17 +121,7 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
             }}
             height={Math.max(100, (description?.split('\n').length || 1) * 24)}
             preview="edit"
-            hideToolbar={false}
-            commands={[
-              commands.bold,
-              commands.italic,
-              commands.unorderedListCommand,
-              commands.orderedListCommand,
-              commands.checkedListCommand,
-              commands.quote,
-              commands.code,
-              commands.link,
-            ]}
+            hideToolbar={true}
           />
         </div>
         <div className="flex gap-2">
