@@ -125,19 +125,10 @@ export function useTaskNavigation(
 
   // Логика выбора активного элемента при изменении видимых задач
   useEffect(() => {
-    console.log('--- useTaskNavigation useEffect triggered ---');
-    console.log('Initial selectedTaskId:', selectedTaskId);
-    console.log('Initial visibleTasks length:', visibleTasks.length);
-
     const currentSelectedId = selectedTaskId;
     const currentVisibleTasks = visibleTasks;
     const prevVisibleTasks = prevVisibleTasksRef.current;
     const prevSelectedId = prevSelectedTaskIdRef.current;
-
-    console.log('prevSelectedId:', prevSelectedId);
-    console.log('prevVisibleTasks length:', prevVisibleTasks.length);
-    console.log('currentSelectedId (before update logic):', currentSelectedId);
-    console.log('currentVisibleTasks length (before update logic):', currentVisibleTasks.length);
 
     // Сохраняем текущее состояние для следующего рендера
     prevVisibleTasksRef.current = currentVisibleTasks;
@@ -145,86 +136,61 @@ export function useTaskNavigation(
 
     // Если нет видимых задач, сбрасываем выделение
     if (currentVisibleTasks.length === 0) {
-      console.log('No visible tasks, setting selectedTaskId to null.');
       setSelectedTaskId(null);
       return;
     }
 
     // Если текущая выбранная задача всё ещё видна, оставляем её
     if (currentSelectedId !== null && currentVisibleTasks.some(t => t.id === currentSelectedId)) {
-      console.log('Current selected task is still visible, keeping it.');
       return;
     }
 
     // Если предыдущая выбранная задача была удалена (или стала невидимой)
     if (prevSelectedId !== null && !currentVisibleTasks.some(t => t.id === prevSelectedId)) {
-      console.log('Previous selected task is no longer visible. Initiating fallback logic.');
-
       // 1. Попытаться найти родителя предыдущей выбранной задачи
       const prevSelectedTask = tasks.find(t => t.id === prevSelectedId);
       if (prevSelectedTask && prevSelectedTask.parentId !== undefined) {
         const parentOfPrevSelected = currentVisibleTasks.find(t => t.id === prevSelectedTask.parentId);
         if (parentOfPrevSelected) {
-          console.log('Found parent in current visible tasks, setting selectedTaskId to parent:', parentOfPrevSelected.id);
           setSelectedTaskId(parentOfPrevSelected.id);
           return;
-        } else {
-          console.log('Parent not found or not visible in current visible tasks.');
         }
-      } else {
-        console.log('Previous selected task had no parent or was not found in full tasks list.');
       }
 
       // 2. Если родитель не найден или не является видимым, вернуться к выбору следующей/предыдущей видимой задачи по индексу
       const prevIndex = prevVisibleTasks.findIndex(t => t.id === prevSelectedId);
-      console.log('prevIndex:', prevIndex);
 
       // Try the same index in the new list
       if (prevIndex !== -1 && prevIndex < currentVisibleTasks.length) {
-        console.log('Attempting to set selectedTaskId to same index:', currentVisibleTasks[prevIndex].id);
         setSelectedTaskId(currentVisibleTasks[prevIndex].id);
         return;
       }
       
       // Try the previous index in the new list
       if (prevIndex > 0 && currentVisibleTasks.length > 0) {
-        const newId = currentVisibleTasks[Math.min(prevIndex - 1, currentVisibleTasks.length - 1)].id;
-        console.log('Attempting to set selectedTaskId to previous index:', newId);
-        setSelectedTaskId(newId);
+        setSelectedTaskId(currentVisibleTasks[Math.min(prevIndex - 1, currentVisibleTasks.length - 1)].id);
         return;
       }
 
       // Try the next index in the new list
       if (currentVisibleTasks.length > 0 && prevIndex !== -1 && prevIndex + 1 < currentVisibleTasks.length) {
-        const newId = currentVisibleTasks[prevIndex + 1].id;
-        console.log('Attempting to set selectedTaskId to next index:', newId);
-        setSelectedTaskId(newId);
+        setSelectedTaskId(currentVisibleTasks[prevIndex + 1].id);
         return;
       }
 
       // 3. Если ни один из вариантов не сработал, выбираем первый видимый элемент (или null, если список пуст).
       if (currentVisibleTasks.length > 0) {
-        console.log('Fallback: Setting selectedTaskId to first visible task:', currentVisibleTasks[0].id);
         setSelectedTaskId(currentVisibleTasks[0].id);
       } else {
-        console.log('Fallback: No visible tasks, setting selectedTaskId to null.');
         setSelectedTaskId(null); 
       }
-      return; // Важно: вернуться после обработки, чтобы избежать дальнейшей логики
+      return;
     }
 
     // Если не удалось сохранить позицию и нет выбранной задачи, выбираем первую (этот блок теперь дублирует часть выше, но пусть останется как запасной вариант, если prevSelectedId был null изначально)
     if (currentSelectedId === null && currentVisibleTasks.length > 0) {
-      console.log('No selected task initially, setting selectedTaskId to first visible task:', currentVisibleTasks[0].id);
       setSelectedTaskId(currentVisibleTasks[0].id);
     }
-
-    // Final check
-    console.log('Final selectedTaskId after useEffect:', selectedTaskId);
-    if (selectedTaskId !== null && !currentVisibleTasks.some(t => t.id === selectedTaskId)) {
-      console.error('ERROR: selectedTaskId is not in currentVisibleTasks after useEffect!', selectedTaskId);
-    }
-    console.log('--- useTaskNavigation useEffect end ---');
   }, [visibleTasks, selectedTaskId, tasks]);
 
   // Обработка навигации клавиатурой
