@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
@@ -66,6 +66,7 @@ export const TaskItem = ({
 }: TaskItemProps) => {
   const taskRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
 
   // Function to adjust textarea height
@@ -89,6 +90,28 @@ export const TaskItem = ({
       taskRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [selectedTaskId, isNavigationActive, task.id]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isNavigationActive && selectedTaskId === task.id && e.key === '=') {
+        e.preventDefault();
+        setIsDescriptionExpanded(prev => !prev);
+      }
+    };
+
+    if (isNavigationActive && selectedTaskId === task.id) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isNavigationActive, selectedTaskId, task.id]);
+
+  // Reset expanded state when task is deselected
+  useEffect(() => {
+    if (!isNavigationActive || selectedTaskId !== task.id) {
+      setIsDescriptionExpanded(false);
+    }
+  }, [isNavigationActive, selectedTaskId, task.id]);
 
   const indentClass = `ml-${Math.min(depth * 4, 16)}`;
   const isSelected = isNavigationActive && selectedTaskId === task.id;
@@ -181,7 +204,12 @@ export const TaskItem = ({
                 </div>
                 {task.description && (
                   <div className={`text-sm mt-1 ${task.isCompleted ? 'line-through text-gray-400' : 'text-gray-600'}`}>
-                    <MarkdownRenderer content={task.description} maxLines={2} />
+                    <MarkdownRenderer 
+                      content={task.description} 
+                      maxLines={2} 
+                      isExpanded={isDescriptionExpanded}
+                      onToggle={setIsDescriptionExpanded}
+                    />
                   </div>
                 )}
                 <div className="flex gap-2 mt-2">

@@ -122,7 +122,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           {nav.isNavigationActive && tasks?.length > 0 && (
             <div className="text-xs text-gray-500 mt-1">
-              Navigation: ↑↓ move, ←→ levels, Enter toggle, E edit, N new, S sibling, C child, Del delete
+              Navigation: ↑↓ move, ←→ levels, Enter toggle, E edit, N new, S sibling, C child, Del delete, = expand/collapse description
               {isTreeView && ', X expand all, Z collapse all'}
             </div>
           )}

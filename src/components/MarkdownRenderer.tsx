@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import '../markdown.css';
 
@@ -6,11 +6,22 @@ interface MarkdownRendererProps {
   content: string;
   className?: string;
   maxLines?: number;
+  isExpanded?: boolean;
+  onToggle?: (isExpanded: boolean) => void;
 }
 
-const MarkdownRenderer = ({ content, className = '', maxLines }: MarkdownRendererProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const MarkdownRenderer = ({ 
+  content, 
+  className = '', 
+  maxLines, 
+  isExpanded = false,
+  onToggle 
+}: MarkdownRendererProps) => {
   const shouldShowExpandButton = maxLines !== undefined;
+
+  const handleToggle = () => {
+    onToggle?.(!isExpanded);
+  };
 
   return (
     <div className={`markdown-content ${className}`}>
@@ -23,7 +34,7 @@ const MarkdownRenderer = ({ content, className = '', maxLines }: MarkdownRendere
       </div>
       {shouldShowExpandButton && (
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleToggle}
           className="text-xs text-blue-500 hover:text-blue-700 mt-1 focus:outline-none"
         >
           {isExpanded ? 'Collapse' : 'Expand'}
