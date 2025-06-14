@@ -127,10 +127,11 @@ export function useTaskNavigation(
     const prevVisibleTasks = prevVisibleTasksRef.current;
     const prevSelectedId = prevSelectedTaskIdRef.current;
 
-    prevVisibleTasksRef.current = currentVisibleTasks; // Обновляем ref для следующего рендера
-    prevSelectedTaskIdRef.current = currentSelectedId; // Обновляем ref для следующего рендера
+    // Сохраняем текущее состояние для следующего рендера
+    prevVisibleTasksRef.current = currentVisibleTasks;
+    prevSelectedTaskIdRef.current = currentSelectedId;
 
-    // Если видимых задач нет, сбрасываем выделение
+    // Если нет видимых задач, сбрасываем выделение
     if (currentVisibleTasks.length === 0) {
       setSelectedTaskId(null);
       return;
@@ -141,43 +142,31 @@ export function useTaskNavigation(
       return;
     }
 
-    // Если предыдущая выбранная задача исчезла (или была null), ищем новую
-    let newSelectedId: number | null = null;
-    if (prevSelectedId !== null) {
+    // Если предыдущая выбранная задача была удалена
+    if (prevSelectedId !== null && !currentVisibleTasks.some(t => t.id === prevSelectedId)) {
+      // Находим индекс предыдущей выбранной задачи в старом списке
       const prevIndex = prevVisibleTasks.findIndex(t => t.id === prevSelectedId);
-
+      
+      // Если нашли индекс
       if (prevIndex !== -1) {
-        // Пытаемся выбрать задачу, которая была ПЕРЕД удаленной задачей в ПРЕДЫДУЩЕМ списке
-        if (prevIndex > 0) {
-          const candidatePrevTask = prevVisibleTasks[prevIndex - 1];
-          if (currentVisibleTasks.some(t => t.id === candidatePrevTask.id)) {
-            newSelectedId = candidatePrevTask.id;
-          }
+        // Пытаемся выбрать задачу на том же индексе в новом списке
+        if (prevIndex < currentVisibleTasks.length) {
+          setSelectedTaskId(currentVisibleTasks[prevIndex].id);
+          return;
         }
-
-        // Если предыдущей не было (удалили первую) или предыдущий элемент не найден в текущем списке,
-        // пытаемся выбрать элемент на ТОЙ ЖЕ позиции (если он существует и список не стал короче)
-        if (newSelectedId === null && prevIndex < currentVisibleTasks.length) {
-          newSelectedId = currentVisibleTasks[prevIndex].id;
-        }
-        // Иначе (если позиция вышла за границы, например, удалили последний элемент, или список пуст),
-        // выбираем ПОСЛЕДНИЙ элемент из нового списка (если он существует)
-        else if (newSelectedId === null && currentVisibleTasks.length > 0) {
-          newSelectedId = currentVisibleTasks[currentVisibleTasks.length - 1].id;
+        // Если индекс выходит за границы, выбираем предыдущую задачу
+        else if (prevIndex > 0 && currentVisibleTasks.length > 0) {
+          setSelectedTaskId(currentVisibleTasks[prevIndex - 1].id);
+          return;
         }
       }
     }
 
-    // Fallback: Если до сих пор не нашли подходящий элемент, выбираем первый доступный
-    if (newSelectedId === null && currentVisibleTasks.length > 0) {
-      newSelectedId = currentVisibleTasks[0].id;
+    // Если не удалось сохранить позицию и нет выбранной задачи, выбираем первую
+    if (currentSelectedId === null && currentVisibleTasks.length > 0) {
+      setSelectedTaskId(currentVisibleTasks[0].id);
     }
-
-    // Обновляем состояние, если новый selectedId отличается
-    if (newSelectedId !== currentSelectedId) {
-      setSelectedTaskId(newSelectedId);
-    }
-  }, [visibleTasks, selectedTaskId]); // Зависимости: при изменении visibleTasks или selectedTaskId
+  }, [visibleTasks, selectedTaskId]);
 
   // Обработка навигации клавиатурой
   useEffect(() => {

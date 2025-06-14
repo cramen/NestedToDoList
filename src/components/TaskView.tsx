@@ -85,15 +85,29 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
+    
     await ops.handleDelete(taskId);
-    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-    if (!newVisible.some(t => t.id === prevSelected)) {
-      if (prevIndex > 0) {
-        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
-      } else {
-        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
+    
+    // Даем время на обновление списка задач
+    setTimeout(() => {
+      const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
+      
+      // Если удалили выбранную задачу
+      if (prevSelected === taskId) {
+        // Если есть задачи после удаленной
+        if (prevIndex < newVisible.length) {
+          nav.setSelectedTaskId(newVisible[prevIndex].id);
+        }
+        // Если удалили последнюю задачу
+        else if (newVisible.length > 0) {
+          nav.setSelectedTaskId(newVisible[newVisible.length - 1].id);
+        }
+        // Если больше нет задач
+        else {
+          nav.setSelectedTaskId(null);
+        }
       }
-    }
+    }, 0);
   };
 
   const handleToggleCompleteWithFocus = async (task: Task) => {
