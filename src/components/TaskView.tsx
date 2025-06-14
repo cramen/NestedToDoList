@@ -87,6 +87,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onDeleteTask: (task) => ops.handleDelete(task.id),
     onStartEdit: ops.handleStartEdit,
     expandedTasks: ops.expandedTasks,
+    isTreeView: isTreeView,
   });
 
   // Patch: wrap ops.handleDelete and ops.handleToggleComplete to update focus after removal
@@ -123,15 +124,10 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
     const prevSelected = nav.selectedTaskId;
     const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
+    
     await ops.handleToggleComplete(task);
-    const newVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-    if (!newVisible.some(t => t.id === prevSelected)) {
-      if (prevIndex > 0) {
-        nav.setSelectedTaskId(newVisible[prevIndex - 1]?.id ?? newVisible[0]?.id ?? null);
-      } else {
-        nav.setSelectedTaskId(newVisible[0]?.id ?? null);
-      }
-    }
+    
+    // Remove setTimeout and manual focus logic
   };
 
   const handleSearchSelect = (taskId: number) => {
