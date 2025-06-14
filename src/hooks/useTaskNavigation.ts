@@ -116,19 +116,26 @@ export function useTaskNavigation(
   const containerRef = useRef<HTMLDivElement>(null);
   const prevVisibleTasksRef = useRef<Task[]>([]); // Для отслеживания предыдущего состояния видимых задач
   const prevSelectedTaskIdRef = useRef<number | null>(null); // Для отслеживания предыдущего выбранного ID
+  const isManualSelectionRef = useRef(false);
 
   // Get flat list of visible tasks
   const visibleTasks = options?.expandedTasks ? getVisibleTasks(tasks, options.expandedTasks) : tasks;
 
   // Логика выбора активного элемента при изменении видимых задач
   useEffect(() => {
+    // Если выбор был сделан вручную (например, при удалении), не меняем его
+    if (isManualSelectionRef.current) {
+      isManualSelectionRef.current = false;
+      return;
+    }
+
     const currentSelectedId = selectedTaskId;
     const currentVisibleTasks = visibleTasks;
     const prevVisibleTasks = prevVisibleTasksRef.current;
     const prevSelectedId = prevSelectedTaskIdRef.current;
 
-    prevVisibleTasksRef.current = currentVisibleTasks; // Обновляем ref для следующего рендера
-    prevSelectedTaskIdRef.current = currentSelectedId; // Обновляем ref для следующего рендера
+    prevVisibleTasksRef.current = currentVisibleTasks;
+    prevSelectedTaskIdRef.current = currentSelectedId;
 
     // Если видимых задач нет, сбрасываем выделение
     if (currentVisibleTasks.length === 0) {
@@ -177,7 +184,7 @@ export function useTaskNavigation(
     if (newSelectedId !== currentSelectedId) {
       setSelectedTaskId(newSelectedId);
     }
-  }, [visibleTasks, selectedTaskId]); // Зависимости: при изменении visibleTasks или selectedTaskId
+  }, [visibleTasks, selectedTaskId]);
 
   // Обработка навигации клавиатурой
   useEffect(() => {
@@ -333,9 +340,15 @@ export function useTaskNavigation(
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [visibleTasks, selectedTaskId, isNavigationActive, options, tasks]);
 
+  // Обертка для setSelectedTaskId, которая помечает выбор как ручной
+  const setSelectedTaskIdWithFlag = (id: number | null) => {
+    isManualSelectionRef.current = true;
+    setSelectedTaskId(id);
+  };
+
   return {
     selectedTaskId,
-    setSelectedTaskId,
+    setSelectedTaskId: setSelectedTaskIdWithFlag,
     isNavigationActive,
     setIsNavigationActive,
     containerRef,
