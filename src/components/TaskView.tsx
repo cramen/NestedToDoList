@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Task, CreateTaskRequest, UpdateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { TaskList } from './TaskList';
@@ -56,9 +56,19 @@ export const TaskView: React.FC<TaskViewProps> = ({
 }) => {
   const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
   const { isOpen: isSearchOpen, closeModal: closeSearch } = useSearchModal();
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [isSubtaskModalOpen, setIsSubtaskModalOpen] = useState(false);
+  const [isSiblingModalOpen, setIsSiblingModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedParentId, setSelectedParentId] = useState<number | undefined>();
 
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
+    setIsNewTaskModalOpen(false);
+    setIsSubtaskModalOpen(false);
+    setIsSiblingModalOpen(false);
+    setIsEditModalOpen(false);
+    setSelectedParentId(undefined);
   };
 
   const ops = useTaskOperations({
@@ -74,18 +84,27 @@ export const TaskView: React.FC<TaskViewProps> = ({
     onNavigateToParent,
     onNavigateToChild,
     editingTask: ops.editingTask,
-    showNewTaskForm: ops.showNewTaskForm,
-    showSubtaskForm: ops.showSubtaskForm,
-    showSiblingForm: ops.showSiblingForm,
+    showNewTaskForm: false,
+    showSubtaskForm: null,
+    showSiblingForm: null,
     onToggleComplete: ops.handleToggleComplete,
-    onToggleExpand: (task) => ops.handleToggleExpand(task.id),
-    onNewTask: () => ops.setShowNewTaskForm(true),
-    onCreateChild: (task) => ops.setShowSubtaskForm(task.id),
-    onCreateSibling: (task) => ops.setShowSiblingForm(task.id),
+    onToggleExpand: (task: Task) => ops.handleToggleExpand(task.id),
+    onNewTask: () => setIsNewTaskModalOpen(true),
+    onCreateChild: (task: Task) => {
+      setSelectedParentId(task.id);
+      setIsSubtaskModalOpen(true);
+    },
+    onCreateSibling: (task: Task) => {
+      setSelectedParentId(task.id);
+      setIsSiblingModalOpen(true);
+    },
     onExpandAll: () => ops.handleExpandAll(tasks),
     onCollapseAll: ops.handleCollapseAll,
-    onDeleteTask: (task) => ops.handleDelete(task.id),
-    onStartEdit: ops.handleStartEdit,
+    onDeleteTask: (task: Task) => ops.handleDelete(task.id),
+    onStartEdit: (task: Task) => {
+      ops.handleStartEdit(task);
+      setIsEditModalOpen(true);
+    },
     expandedTasks: ops.expandedTasks,
     isTreeView: isTreeView,
   });
@@ -168,6 +187,21 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
   const handleSaveEdit = async (taskId: number, title: string, description: string) => {
     await ops.handleSaveEdit(taskId, title, description);
+    setIsEditModalOpen(false);
+  };
+
+  const handleSubtaskSubmit = async (task: CreateTaskRequest) => {
+    if (selectedParentId !== undefined) {
+      await onCreateSubtask(selectedParentId, task);
+      onFormClose();
+    }
+  };
+
+  const handleSiblingSubmit = async (task: CreateTaskRequest) => {
+    if (selectedParentId !== undefined) {
+      await onCreateSibling(selectedParentId, task);
+      onFormClose();
+    }
   };
 
   return (
@@ -213,26 +247,62 @@ export const TaskView: React.FC<TaskViewProps> = ({
             </>
           )}
           <button
-            onClick={() => ops.setShowNewTaskForm(true)}
+            onClick={() => setIsNewTaskModalOpen(true)}
             className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
           >
             <i className="fas fa-plus"></i> New Task
           </button>
         </div>
       </div>
-      {ops.showNewTaskForm && (
-        <TaskForm
-          onSubmit={ops.handleNewTaskSubmit}
-          onCancel={ops.handleNewTaskCancel}
-          placeholder="Enter new task title..."
-        />
-      )}
+
+      <TaskForm
+        isOpen={isNewTaskModalOpen}
+        onSubmit={ops.handleNewTaskSubmit}
+        onCancel={onFormClose}
+        placeholder="Enter new task title..."
+        title="Create New Task"
+      />
+
+      <TaskForm
+        isOpen={isSubtaskModalOpen}
+        onSubmit={handleSubtaskSubmit}
+        onCancel={onFormClose}
+        parentId={selectedParentId}
+        placeholder="Enter subtask title..."
+        title="Create Subtask"
+      />
+
+      <TaskForm
+        isOpen={isSiblingModalOpen}
+        onSubmit={handleSiblingSubmit}
+        onCancel={onFormClose}
+        parentId={selectedParentId}
+        placeholder="Enter sibling task title..."
+        title="Create Sibling Task"
+      />
+
+      <TaskForm
+        isOpen={isEditModalOpen}
+        onSubmit={async (task) => {
+          if (ops.editingTask !== null) {
+            await handleSaveEdit(ops.editingTask, task.title, task.description || '');
+          }
+        }}
+        onCancel={onFormClose}
+        initialTitle={ops.editTitle}
+        initialDescription={ops.editDescription}
+        placeholder="Edit task title..."
+        title="Edit Task"
+        submitButtonText="Save Changes"
+        loadingButtonText="Saving..."
+      />
+
       {!tasks?.length ? (
         <div className="text-center py-8 flex flex-col items-center justify-center">
           <PenguinAnimation />
           <p className="text-lg text-gray-500">Похоже, пока нет задач.</p>
           <button
-            onClick={() => ops.setShowNewTaskForm(true)}
+            onClick={() => setIsNewTaskModalOpen(true)}
             className="text-sm text-blue-500 hover:text-blue-700 cursor-pointer mt-2 focus:outline-none"
           >
             Создайте свою первую задачу, чтобы начать!
@@ -249,21 +319,27 @@ export const TaskView: React.FC<TaskViewProps> = ({
           editDescription={ops.editDescription}
           setEditTitle={ops.setEditTitle}
           setEditDescription={ops.setEditDescription}
-          onToggleComplete={handleToggleComplete}
-          onStartEdit={ops.handleStartEdit}
-          onDelete={handleDeleteWithFocus}
-          onCreateSibling={ops.handleCreateSibling}
-          onCreateSubtask={ops.handleCreateSubtask}
           onSaveEdit={handleSaveEdit}
           onCancelEdit={ops.handleCancelEdit}
-          showSiblingFormId={ops.showSiblingForm}
-          setShowSiblingFormId={ops.setShowSiblingForm}
-          showSubtaskFormId={ops.showSubtaskForm}
-          setShowSubtaskFormId={ops.setShowSubtaskForm}
+          onToggleComplete={handleToggleComplete}
+          onToggleExpand={(taskId: number) => ops.handleToggleExpand(taskId)}
+          onCreateSubtask={async (taskId: number, task: CreateTaskRequest) => {
+            setSelectedParentId(taskId);
+            setIsSubtaskModalOpen(true);
+          }}
+          onCreateSibling={async (taskId: number, task: CreateTaskRequest) => {
+            setSelectedParentId(taskId);
+            setIsSiblingModalOpen(true);
+          }}
+          onDelete={handleDeleteWithFocus}
           expandedTasks={ops.expandedTasks}
-          onToggleExpand={ops.handleToggleExpand}
+          showSiblingFormId={null}
+          setShowSiblingFormId={() => {}}
+          showSubtaskFormId={null}
+          setShowSubtaskFormId={() => {}}
           allTasks={allTasks}
           onSelectTask={nav.setSelectedTaskId}
+          onStartEdit={ops.handleStartEdit}
         />
       ) : (
         <TaskList
@@ -276,19 +352,25 @@ export const TaskView: React.FC<TaskViewProps> = ({
           editDescription={ops.editDescription}
           setEditTitle={ops.setEditTitle}
           setEditDescription={ops.setEditDescription}
-          onToggleComplete={handleToggleComplete}
-          onStartEdit={ops.handleStartEdit}
-          onDelete={handleDeleteWithFocus}
-          onCreateSibling={ops.handleCreateSibling}
-          onCreateSubtask={ops.handleCreateSubtask}
           onSaveEdit={handleSaveEdit}
           onCancelEdit={ops.handleCancelEdit}
-          showSiblingFormId={ops.showSiblingForm}
-          setShowSiblingFormId={ops.setShowSiblingForm}
-          showSubtaskFormId={ops.showSubtaskForm}
-          setShowSubtaskFormId={ops.setShowSubtaskForm}
+          onToggleComplete={handleToggleComplete}
+          onCreateSubtask={async (taskId: number, task: CreateTaskRequest) => {
+            setSelectedParentId(taskId);
+            setIsSubtaskModalOpen(true);
+          }}
+          onCreateSibling={async (taskId: number, task: CreateTaskRequest) => {
+            setSelectedParentId(taskId);
+            setIsSiblingModalOpen(true);
+          }}
+          onDelete={handleDeleteWithFocus}
+          showSiblingFormId={null}
+          setShowSiblingFormId={() => {}}
+          showSubtaskFormId={null}
+          setShowSubtaskFormId={() => {}}
           allTasks={allTasks}
           onSelectTask={nav.setSelectedTaskId}
+          onStartEdit={ops.handleStartEdit}
         />
       )}
     </div>

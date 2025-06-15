@@ -3,6 +3,7 @@ import { CreateTaskRequest } from '../types/Task';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
+import { Modal } from './Modal';
 
 interface TaskFormBaseProps {
   onSubmit: (task: CreateTaskRequest) => Promise<void>;
@@ -13,6 +14,8 @@ interface TaskFormBaseProps {
   initialDescription?: string;
   submitButtonText?: string;
   loadingButtonText?: string;
+  isOpen: boolean;
+  title?: string;
 }
 
 export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
@@ -24,19 +27,29 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
   initialDescription = '',
   submitButtonText = 'Create Task',
   loadingButtonText = 'Creating...',
+  isOpen,
+  title,
 }) => {
-  const [title, setTitle] = useState(initialTitle);
+  const [titleValue, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [loading, setLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialTitle);
+      setDescription(initialDescription);
+      setIsValid(initialTitle.trim().length > 0);
+    }
+  }, [isOpen, initialTitle, initialDescription]);
+
   // Update validation state when title changes
   useEffect(() => {
-    setIsValid(title.trim().length > 0);
-  }, [title]);
+    setIsValid(titleValue.trim().length > 0);
+  }, [titleValue]);
 
-  // Using useCallback to memoize handleSubmit, as it's a dependency of useEffect
   const handleSubmit = useCallback(async (e: React.FormEvent | KeyboardEvent) => {
     e.preventDefault();
     if (!isValid) return;
@@ -44,7 +57,7 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
     setLoading(true);
     try {
       await onSubmit({
-        title: title.trim(),
+        title: titleValue.trim(),
         description: description.trim() || undefined,
         parentId,
       });
@@ -57,7 +70,7 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [title, description, parentId, onSubmit, onCancel, isValid]);
+  }, [titleValue, description, parentId, onSubmit, onCancel, isValid]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -82,25 +95,24 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
             }
           }
         }
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        onCancel();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [title, loading, onCancel, handleSubmit, isValid]);
+  }, [titleValue, loading, handleSubmit, isValid, isOpen]);
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="bg-white p-4 border rounded-lg shadow-sm">
-      <div className="space-y-3">
+    <Modal isOpen={isOpen} onClose={onCancel} title={title}>
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         <div>
           <input
             type="text"
-            value={title}
+            value={titleValue}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={placeholder}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -119,21 +131,12 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
               disabled: loading,
               tabIndex: 2,
             }}
-            height={Math.max(100, (description?.split('\n').length || 1) * 24)}
+            height={Math.max(200, (description?.split('\n').length || 1) * 24)}
             preview="edit"
             hideToolbar={true}
           />
         </div>
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={!isValid || loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
-            tabIndex={3}
-          >
-            {loading && <i className="fas fa-spinner fa-spin"></i>}
-            {loading ? loadingButtonText : submitButtonText}
-          </button>
+        <div className="flex gap-2 justify-end">
           <button
             type="button"
             onClick={onCancel}
@@ -143,8 +146,17 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
           >
             Cancel
           </button>
+          <button
+            type="submit"
+            disabled={!isValid || loading}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+            tabIndex={3}
+          >
+            {loading && <i className="fas fa-spinner fa-spin"></i>}
+            {loading ? loadingButtonText : submitButtonText}
+          </button>
         </div>
-      </div>
-    </form>
+      </form>
+    </Modal>
   );
 }; 

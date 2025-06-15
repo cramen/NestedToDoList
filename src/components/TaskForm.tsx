@@ -7,14 +7,20 @@ interface TaskFormProps {
   onCancel: () => void;
   parentId?: number;
   placeholder?: string;
+  isOpen: boolean;
+  title?: string;
+  initialTitle?: string;
+  initialDescription?: string;
+  submitButtonText?: string;
+  loadingButtonText?: string;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = (props) => {
   return (
     <TaskFormBase
       {...props}
-      submitButtonText="Create Task"
-      loadingButtonText="Creating..."
+      submitButtonText={props.submitButtonText || "Create Task"}
+      loadingButtonText={props.loadingButtonText || "Creating..."}
     />
   );
 };
