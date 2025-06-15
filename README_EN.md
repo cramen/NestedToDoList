@@ -2,6 +2,8 @@
 
 NestedTaskTracker is a modern task management application with support for nested structures and smart navigation. It allows you to effectively organize your tasks into a hierarchical structure and focus on current tasks.
 
+**Try the application live here:** [https://cramen.github.io/NestedToDoList/](https://cramen.github.io/NestedToDoList/)
+
 ## Key Features
 
 ### 🎯 Focus on Current Tasks
