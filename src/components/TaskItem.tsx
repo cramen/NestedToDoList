@@ -248,6 +248,7 @@ export const TaskItem = ({
                 initialDescription={editDescription}
                 submitButtonText="Save"
                 loadingButtonText="Saving..."
+                isOpen={isEditing}
               />
             ) : (
               <div>
@@ -309,6 +310,7 @@ export const TaskItem = ({
                     }}
                     onCancel={() => setShowSiblingForm(null)}
                     placeholder="Enter sibling task title..."
+                    isOpen={showSiblingForm === task.id}
                   />
                 )}
                 {showSubtaskForm === task.id && (
@@ -318,6 +320,7 @@ export const TaskItem = ({
                     }}
                     onCancel={() => setShowSubtaskForm(null)}
                     placeholder="Enter subtask title..."
+                    isOpen={showSubtaskForm === task.id}
                   />
                 )}
               </div>

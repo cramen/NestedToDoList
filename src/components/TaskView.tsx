@@ -381,11 +381,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
           onCancelEdit={ops.handleCancelEdit}
           onToggleComplete={handleToggleComplete}
           onToggleExpand={(taskId: number) => ops.handleToggleExpand(taskId)}
-          onCreateSubtask={async (taskId: number, task: CreateTaskRequest) => {
+          onCreateSubtask={async (taskId: number) => {
             setSelectedParentId(taskId);
             setIsSubtaskModalOpen(true);
           }}
-          onCreateSibling={async (taskId: number, task: CreateTaskRequest) => {
+          onCreateSibling={async (taskId: number) => {
             setSelectedParentId(taskId);
             setIsSiblingModalOpen(true);
           }}
@@ -413,11 +413,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
           onSaveEdit={handleSaveEdit}
           onCancelEdit={ops.handleCancelEdit}
           onToggleComplete={handleToggleComplete}
-          onCreateSubtask={async (taskId: number, task: CreateTaskRequest) => {
+          onCreateSubtask={async (taskId: number) => {
             setSelectedParentId(taskId);
             setIsSubtaskModalOpen(true);
           }}
-          onCreateSibling={async (taskId: number, task: CreateTaskRequest) => {
+          onCreateSibling={async (taskId: number) => {
             setSelectedParentId(taskId);
             setIsSiblingModalOpen(true);
           }}

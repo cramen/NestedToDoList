@@ -159,6 +159,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   onSubmit={async (taskData) => { await onCreateSibling(task.id, taskData); }}
                   onCancel={() => setShowSiblingFormId && setShowSiblingFormId(null)}
                   placeholder="Enter sibling task title..."
+                  isOpen={showSiblingForm}
                 />
               )}
               {showSubtaskForm && (
@@ -166,6 +167,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   onSubmit={async (taskData) => { await onCreateSubtask(task.id, taskData); }}
                   onCancel={() => setShowSubtaskFormId && setShowSubtaskFormId(null)}
                   placeholder="Enter subtask title..."
+                  isOpen={showSubtaskForm}
                 />
               )}
             </div>
