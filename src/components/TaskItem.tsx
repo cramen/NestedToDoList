@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
-import { TaskFormBase } from './TaskFormBase';
 import { getRootTask } from '../utils/taskUtils';
 import MarkdownRenderer from './MarkdownRenderer';
 import '@uiw/react-md-editor/markdown-editor.css';
