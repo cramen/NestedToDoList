@@ -99,7 +99,7 @@ export const TaskItem = ({
         }
       } else {
         // Reset styles and scroll to top on collapse
-        currentMarkdownElement.style.overflowY = 'visible';
+        currentMarkdownElement.style.overflowY = 'hidden';
         currentMarkdownElement.style.maxHeight = '';
         currentMarkdownElement.scrollTop = 0; // Scroll to top on collapse
       }

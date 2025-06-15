@@ -28,16 +28,20 @@ const MarkdownRenderer = forwardRef(({
   };
 
   const divStyle: React.CSSProperties = {};
-  if (scrollMaxHeight) {
-    divStyle.maxHeight = scrollMaxHeight;
-  }
-  if (scrollOverflowY) {
-    divStyle.overflowY = scrollOverflowY;
+  if (isExpanded) {
+    if (scrollMaxHeight) {
+      divStyle.maxHeight = scrollMaxHeight;
+    }
+    if (scrollOverflowY) {
+      divStyle.overflowY = scrollOverflowY;
+    }
+  } else {
+    divStyle.overflowY = 'hidden';
   }
 
   return (
     <div className={`markdown-content ${className}`}>
-      <div 
+      <div
         ref={ref}
         className={`${shouldShowExpandButton && !isExpanded ? 'line-clamp-2' : ''}`}
         style={divStyle}
@@ -58,4 +62,4 @@ const MarkdownRenderer = forwardRef(({
   );
 });
 
-export default MarkdownRenderer; 
+export default MarkdownRenderer;
