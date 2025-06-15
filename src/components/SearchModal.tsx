@@ -11,11 +11,15 @@ interface SearchModalProps {
 // Helper function to get all tasks including nested ones
 const getAllTasks = (tasks: Task[]): Task[] => {
   const result: Task[] = [];
+  const processedIds = new Set<number>();
   
   const traverse = (task: Task) => {
-    result.push(task);
-    if (task.children && task.children.length > 0) {
-      task.children.forEach(traverse);
+    if (!processedIds.has(task.id)) {
+      result.push(task);
+      processedIds.add(task.id);
+      if (task.children && task.children.length > 0) {
+        task.children.forEach(traverse);
+      }
     }
   };
   
@@ -32,13 +36,14 @@ export const SearchModal = ({ isOpen, onClose, allTasks, onSelectTask }: SearchM
   const allTasksFlat = getAllTasks(allTasks);
 
   // Filter tasks based on search query
-  const filteredTasks = allTasksFlat.filter(task => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      task.title.toLowerCase().includes(searchLower) ||
-      (task.description?.toLowerCase().includes(searchLower) ?? false)
-    );
-  });
+  const filteredTasks = searchQuery.trim() === '' 
+    ? [] 
+    : allTasksFlat.filter(task => {
+        const searchLower = searchQuery.toLowerCase().trim();
+        const titleMatch = task.title.toLowerCase().includes(searchLower);
+        const descriptionMatch = task.description?.toLowerCase().includes(searchLower) ?? false;
+        return titleMatch || descriptionMatch;
+      });
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -48,11 +53,15 @@ export const SearchModal = ({ isOpen, onClose, allTasks, onSelectTask }: SearchM
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex(prev => Math.max(0, prev - 1));
+          if (filteredTasks.length > 0) {
+            setSelectedIndex(prev => Math.max(0, prev - 1));
+          }
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex(prev => Math.min(filteredTasks.length - 1, prev + 1));
+          if (filteredTasks.length > 0) {
+            setSelectedIndex(prev => Math.min(filteredTasks.length - 1, prev + 1));
+          }
           break;
         case 'Enter':
           e.preventDefault();
@@ -72,6 +81,14 @@ export const SearchModal = ({ isOpen, onClose, allTasks, onSelectTask }: SearchM
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, filteredTasks, selectedIndex, onClose, onSelectTask]);
 
+  // Reset search query and selected index when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSearchQuery('');
+      setSelectedIndex(0);
+    }
+  }, [isOpen]);
+
   // Focus input when modal opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -79,13 +96,10 @@ export const SearchModal = ({ isOpen, onClose, allTasks, onSelectTask }: SearchM
     }
   }, [isOpen]);
 
-  // Reset search query when modal opens
+  // Reset selected index when search query changes
   useEffect(() => {
-    if (isOpen) {
-      setSearchQuery('');
-      setSelectedIndex(0);
-    }
-  }, [isOpen]);
+    setSelectedIndex(0);
+  }, [searchQuery]);
 
   if (!isOpen) return null;
 
@@ -97,38 +111,40 @@ export const SearchModal = ({ isOpen, onClose, allTasks, onSelectTask }: SearchM
             ref={inputRef}
             type="text"
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSelectedIndex(0);
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tasks..."
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="max-h-96 overflow-y-auto">
-          {filteredTasks.map((task, index) => (
-            <div
-              key={task.id}
-              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                index === selectedIndex ? 'bg-blue-50' : ''
-              }`}
-              onClick={() => {
-                onSelectTask(task.id);
-                onClose();
-              }}
-            >
-              <div className="font-medium">{task.title}</div>
-              {task.description && (
-                <div className="text-sm text-gray-600 truncate">
-                  {task.description}
-                </div>
-              )}
+          {searchQuery.trim() === '' ? (
+            <div className="px-4 py-2 text-gray-500 text-center">
+              Start typing to search tasks
             </div>
-          ))}
-          {filteredTasks.length === 0 && (
+          ) : filteredTasks.length === 0 ? (
             <div className="px-4 py-2 text-gray-500 text-center">
               No tasks found
             </div>
+          ) : (
+            filteredTasks.map((task, index) => (
+              <div
+                key={task.id}
+                className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
+                  index === selectedIndex ? 'bg-blue-50' : ''
+                }`}
+                onClick={() => {
+                  onSelectTask(task.id);
+                  onClose();
+                }}
+              >
+                <div className="font-medium">{task.title}</div>
+                {task.description && (
+                  <div className="text-sm text-gray-600 truncate">
+                    {task.description}
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       </div>
