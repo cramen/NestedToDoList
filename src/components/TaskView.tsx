@@ -190,17 +190,75 @@ export const TaskView: React.FC<TaskViewProps> = ({
     setIsEditModalOpen(false);
   };
 
+  const handleNewTaskSubmit = async (task: CreateTaskRequest) => {
+    const newTask = await ops.handleNewTaskSubmit(task);
+    onFormClose();
+
+    // Даем время на обновление списка задач
+    setTimeout(() => {
+      if (isTreeView) {
+        // Найти цепочку родителей
+        const newExpandedTasks = new Set(ops.expandedTasks);
+        let currentTask = allTasks.find(t => t.id === newTask.id);
+        while (currentTask && currentTask.parentId !== undefined) {
+          newExpandedTasks.add(currentTask.parentId);
+          const parentTask = allTasks.find(t => t.id === currentTask?.parentId);
+          if (!parentTask) break;
+          currentTask = parentTask;
+        }
+        ops.setExpandedTasks(newExpandedTasks);
+      }
+      nav.setSelectedTaskId(newTask.id);
+    }, 0);
+  };
+
   const handleSubtaskSubmit = async (task: CreateTaskRequest) => {
     if (selectedParentId !== undefined) {
-      await onCreateSubtask(selectedParentId, task);
+      const newTask = await onCreateSubtask(selectedParentId, task);
       onFormClose();
+
+      // Даем время на обновление списка задач
+      setTimeout(() => {
+        if (isTreeView) {
+          // Найти цепочку родителей
+          const newExpandedTasks = new Set(ops.expandedTasks);
+          // Добавляем родительский узел в раскрытые
+          newExpandedTasks.add(selectedParentId);
+          let currentTask = allTasks.find(t => t.id === newTask.id);
+          while (currentTask && currentTask.parentId !== undefined) {
+            newExpandedTasks.add(currentTask.parentId);
+            const parentTask = allTasks.find(t => t.id === currentTask?.parentId);
+            if (!parentTask) break;
+            currentTask = parentTask;
+          }
+          ops.setExpandedTasks(newExpandedTasks);
+        }
+        nav.setSelectedTaskId(newTask.id);
+      }, 0);
     }
   };
 
   const handleSiblingSubmit = async (task: CreateTaskRequest) => {
     if (selectedParentId !== undefined) {
-      await onCreateSibling(selectedParentId, task);
+      const newTask = await onCreateSibling(selectedParentId, task);
       onFormClose();
+
+      // Даем время на обновление списка задач
+      setTimeout(() => {
+        if (isTreeView) {
+          // Найти цепочку родителей
+          const newExpandedTasks = new Set(ops.expandedTasks);
+          let currentTask = allTasks.find(t => t.id === newTask.id);
+          while (currentTask && currentTask.parentId !== undefined) {
+            newExpandedTasks.add(currentTask.parentId);
+            const parentTask = allTasks.find(t => t.id === currentTask?.parentId);
+            if (!parentTask) break;
+            currentTask = parentTask;
+          }
+          ops.setExpandedTasks(newExpandedTasks);
+        }
+        nav.setSelectedTaskId(newTask.id);
+      }, 0);
     }
   };
 
@@ -257,7 +315,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
       <TaskForm
         isOpen={isNewTaskModalOpen}
-        onSubmit={ops.handleNewTaskSubmit}
+        onSubmit={handleNewTaskSubmit}
         onCancel={onFormClose}
         placeholder="Enter new task title..."
         title="Create New Task"

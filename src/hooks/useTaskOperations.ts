@@ -83,9 +83,11 @@ export const useTaskOperations = ({
 
   const handleCreateSibling = async (taskId: number, task: CreateTaskRequest) => {
     try {
-      await onCreateSibling(taskId, task);
+      const newTask = await onCreateSibling(taskId, task);
+      return newTask;
     } catch (error) {
       console.error('Failed to create sibling task:', error);
+      throw error;
     } finally {
       setLoading(null);
       onFormClose && onFormClose();
@@ -94,9 +96,11 @@ export const useTaskOperations = ({
 
   const handleCreateSubtask = async (parentId: number, task: CreateTaskRequest) => {
     try {
-      await onCreateSubtask(parentId, task);
+      const newTask = await onCreateSubtask(parentId, task);
+      return newTask;
     } catch (error) {
       console.error('Failed to create subtask:', error);
+      throw error;
     } finally {
       setLoading(null);
       onFormClose && onFormClose();
@@ -105,9 +109,11 @@ export const useTaskOperations = ({
 
   const handleNewTaskSubmit = async (task: CreateTaskRequest) => {
     try {
-      await onCreateTask(task);
+      const newTask = await onCreateTask(task);
+      return newTask;
     } catch (error) {
       console.error('Failed to create task:', error);
+      throw error;
     } finally {
       setLoading(null);
       onFormClose && onFormClose();
