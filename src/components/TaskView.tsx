@@ -121,10 +121,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
   };
 
   const handleToggleCompleteWithFocus = async (task: Task) => {
-    const prevVisible = isTreeView ? getVisibleTasks(tasks, ops.expandedTasks) : tasks;
-    const prevSelected = nav.selectedTaskId;
-    const prevIndex = prevVisible.findIndex(t => t.id === prevSelected);
-    
     await ops.handleToggleComplete(task);
     
     // Remove setTimeout and manual focus logic

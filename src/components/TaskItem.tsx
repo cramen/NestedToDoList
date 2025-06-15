@@ -1,11 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
-import type { ChangeEvent } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
 import { TaskFormBase } from './TaskFormBase';
 import { getRootTask } from '../utils/taskUtils';
 import MarkdownRenderer from './MarkdownRenderer';
-import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
 
