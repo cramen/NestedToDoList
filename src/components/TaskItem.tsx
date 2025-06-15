@@ -116,28 +116,19 @@ export const TaskItem = ({
           const scrollStep = 30; 
 
           if (e.key === 'ArrowUp') {
-            console.log('ArrowUp pressed.');
-            console.log('ScrollTop:', scrollTop, 'ScrollHeight:', scrollHeight, 'ClientHeight:', clientHeight);
             if (scrollTop > 0) {
               e.preventDefault();
               e.stopImmediatePropagation();
               descriptionScrollElement.scrollTop -= scrollStep;
-              console.log('Scrolling up. New scrollTop:', descriptionScrollElement.scrollTop);
-              return; 
+              return;
             } else {
-              console.log('At top, allowing default navigation.');
             }
           } else if (e.key === 'ArrowDown') {
-            console.log('ArrowDown pressed.');
-            console.log('ScrollTop:', scrollTop, 'ScrollHeight:', scrollHeight, 'ClientHeight:', clientHeight);
             if (scrollTop + clientHeight < scrollHeight) {
               e.preventDefault();
               e.stopImmediatePropagation();
               descriptionScrollElement.scrollTop += scrollStep;
-              console.log('Scrolling down. New scrollTop:', descriptionScrollElement.scrollTop);
-              return; 
-            } else {
-              console.log('At bottom, allowing default navigation.');
+              return;
             }
           }
         }
