@@ -35,15 +35,45 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
   const [loading, setLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
-  // Reset form when modal opens
+  // Reset form when modal opens and set focus
   useEffect(() => {
     if (isOpen) {
       setTitle(initialTitle);
       setDescription(initialDescription);
       setIsValid(initialTitle.trim().length > 0);
+      // Programmatically focus the title input when the modal opens
+      titleInputRef.current?.focus();
     }
   }, [isOpen, initialTitle, initialDescription]);
+
+  // Handle tab key to focus editor
+  useEffect(() => {
+    const handleTabKey = (e: KeyboardEvent) => {
+      // Check if the currently active element is the title input
+      if (e.key === 'Tab' && !e.shiftKey && document.activeElement === titleInputRef.current) {
+        e.preventDefault(); // Prevent default tab behavior
+
+        // Find the actual textarea element inside MDEditor and focus it
+        const editorTextarea = editorRef.current?.querySelector('textarea');
+        if (editorTextarea) {
+          // Use setTimeout to ensure the DOM is ready for focus
+          setTimeout(() => {
+            editorTextarea.focus();
+          }, 0);
+        }
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleTabKey);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleTabKey);
+    };
+  }, [isOpen]);
 
   // Update validation state when title changes
   useEffect(() => {
@@ -112,6 +142,7 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
         <div>
           <input
             type="text"
+            ref={titleInputRef}
             value={titleValue}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={placeholder}
@@ -121,7 +152,7 @@ export const TaskFormBase: React.FC<TaskFormBaseProps> = ({
             tabIndex={1}
           />
         </div>
-        <div>
+        <div ref={editorRef}>
           <MDEditor
             value={description}
             onChange={(val?: string) => setDescription(val || '')}

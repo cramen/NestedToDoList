@@ -237,7 +237,7 @@ export const TaskItem = ({
           {/* Task content */}
           <div className="flex-1">
             {isEditing ? (
-              <TaskFormBase
+              <TaskForm
                 onSubmit={async (taskData) => {
                   setEditTitle(taskData.title);
                   setEditDescription(taskData.description || '');
@@ -249,6 +249,8 @@ export const TaskItem = ({
                 submitButtonText="Save"
                 loadingButtonText="Saving..."
                 isOpen={isEditing}
+                placeholder="Edit task title..."
+                title="Edit Task"
               />
             ) : (
               <div>
