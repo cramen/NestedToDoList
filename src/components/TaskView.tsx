@@ -19,13 +19,10 @@ interface TaskViewProps {
   onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<Task>;
   onNavigateToParent?: (taskId: number) => void;
   onNavigateToChild?: (taskId: number) => void;
-  title: string;
   isTreeView: boolean;
   allTasks?: Task[];
   onSetViewMode: (mode: 'deepest' | 'tree') => void;
-  onExpandAll?: (tasks: Task[]) => void;
-  onCollapseAll?: () => void;
-  onNewTask?: () => void;
+  expandedTasks: Set<number>;
 }
 
 // Helper function to get flat list of visible tasks
@@ -52,13 +49,10 @@ export const TaskView: React.FC<TaskViewProps> = ({
   onCreateSubtask,
   onNavigateToParent,
   onNavigateToChild,
-  title,
   isTreeView,
   allTasks = [],
   onSetViewMode,
-  onExpandAll,
-  onCollapseAll,
-  onNewTask,
+  expandedTasks,
 }) => {
   const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
   const { isOpen: isSearchOpen, closeModal: closeSearch } = useSearchModal();

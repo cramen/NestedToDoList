@@ -40,6 +40,10 @@ function App() {
     setExpandedTasks(new Set());
   };
 
+  const handleNewTask = () => {
+    setIsNewTaskModalOpen(true);
+  };
+
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Проверяем, что фокус не находится в поле ввода
@@ -121,7 +125,7 @@ function App() {
                   </>
                 )}
                 <button
-                  onClick={() => setIsNewTaskModalOpen(true)}
+                  onClick={handleNewTask}
                   className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
                 >
                   <i className="fas fa-plus"></i> New Task
@@ -158,13 +162,10 @@ function App() {
             onCreateTask={createTask}
             onCreateSibling={createSiblingTask}
             onCreateSubtask={createSubtask}
-            title={viewMode === 'deepest' ? "Deepest Tasks" : "Complete Task Tree"}
             isTreeView={viewMode === 'tree'}
             allTasks={allTasksFlat}
             onSetViewMode={setViewMode}
-            onExpandAll={handleExpandAll}
-            onCollapseAll={handleCollapseAll}
-            onNewTask={() => setIsNewTaskModalOpen(true)}
+            expandedTasks={expandedTasks}
           />
         </div>
       </main>
