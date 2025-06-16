@@ -23,6 +23,9 @@ interface TaskViewProps {
   isTreeView: boolean;
   allTasks?: Task[];
   onSetViewMode: (mode: 'deepest' | 'tree') => void;
+  onExpandAll?: (tasks: Task[]) => void;
+  onCollapseAll?: () => void;
+  onNewTask?: () => void;
 }
 
 // Helper function to get flat list of visible tasks
@@ -53,6 +56,9 @@ export const TaskView: React.FC<TaskViewProps> = ({
   isTreeView,
   allTasks = [],
   onSetViewMode,
+  onExpandAll,
+  onCollapseAll,
+  onNewTask,
 }) => {
   const taskToSelectAfterTreeSwitchRef = useRef<number | null>(null);
   const { isOpen: isSearchOpen, closeModal: closeSearch } = useSearchModal();
@@ -278,44 +284,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
         allTasks={allTasks}
         onSelectTask={handleSearchSelect}
       />
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-          {nav.isNavigationActive && tasks?.length > 0 && (
-            <NavigationHelp isTreeView={isTreeView} />
-          )}
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onSetViewMode(isTreeView ? 'deepest' : 'tree')}
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            <i className={`fas fa-${isTreeView ? 'list' : 'sitemap'}`}></i> {isTreeView ? 'List View' : 'Tree View'}
-          </button>
-          {isTreeView && tasks.length > 0 && (
-            <>
-              <button
-                onClick={() => ops.handleExpandAll(tasks)}
-                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                <i className="fas fa-expand"></i> Expand All
-              </button>
-              <button
-                onClick={ops.handleCollapseAll}
-                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                <i className="fas fa-compress"></i> Collapse All
-              </button>
-            </>
-          )}
-          <button
-            onClick={() => setIsNewTaskModalOpen(true)}
-            className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            <i className="fas fa-plus"></i> New Task
-          </button>
-        </div>
-      </div>
 
       <TaskForm
         isOpen={isNewTaskModalOpen}

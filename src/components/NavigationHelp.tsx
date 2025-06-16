@@ -31,11 +31,7 @@ export const NavigationHelp: React.FC<NavigationHelpProps> = ({ isTreeView = fal
   }, []);
 
   if (!isVisible) {
-    return (
-      <div className="text-xs text-gray-500 mt-1">
-        Press H for help
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useTasks } from './hooks/useTasks';
 import { TaskView } from './components/TaskView';
+import { Task } from './types/Task';
 
 type ViewMode = 'deepest' | 'tree';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('deepest');
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
   const {
     tasks,
     deepestTasks,
@@ -18,6 +21,24 @@ function App() {
     deleteTask,
     allTasksFlat,
   } = useTasks();
+
+  const handleExpandAll = (tasks: Task[]) => {
+    const allTaskIds = new Set<number>();
+    const collectTaskIds = (taskList: Task[]) => {
+      taskList.forEach(task => {
+        allTaskIds.add(task.id);
+        if (task.children) {
+          collectTaskIds(task.children);
+        }
+      });
+    };
+    collectTaskIds(tasks);
+    setExpandedTasks(allTaskIds);
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedTasks(new Set());
+  };
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -70,7 +91,8 @@ function App() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <i className="fas fa-tasks text-2xl text-blue-500 mr-3"></i>
-              <h1 className="text-2xl font-bold text-gray-900">Hierarchical Todo List</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{viewMode === 'deepest' ? "Deepest Tasks" : "Complete Task Tree"}</h1>
+              <span className="ml-4 text-sm text-gray-500">Press H for help</span>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -81,29 +103,46 @@ function App() {
                 </div>
               )}
 
-              <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="flex gap-2">
+                {viewMode === 'tree' && tasks.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => handleExpandAll(tasks)}
+                      className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      <i className="fas fa-expand"></i> Expand All
+                    </button>
+                    <button
+                      onClick={handleCollapseAll}
+                      className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      <i className="fas fa-compress"></i> Collapse All
+                    </button>
+                  </>
+                )}
                 <button
-                  onClick={() => setViewMode('deepest')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    viewMode === 'deepest'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:text-gray-900'
-                  }`}
+                  onClick={() => setIsNewTaskModalOpen(true)}
+                  className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
                 >
-                  <i className="fas fa-list mr-2"></i>
-                  Deepest Tasks [<span className="text-xs">[</span>]
+                  <i className="fas fa-plus"></i> New Task
                 </button>
-                <button
-                  onClick={() => setViewMode('tree')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    viewMode === 'tree'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-gray-700 hover:text-gray-900'
-                  }`}
-                >
-                  <i className="fas fa-sitemap mr-2"></i>
-                  Full Tree [<span className="text-xs">]</span>]
-                </button>
+                {viewMode === 'tree' ? (
+                  <button
+                    onClick={() => setViewMode('deepest')}
+                    className="px-4 py-2 rounded-md text-sm font-medium bg-blue-500 text-white shadow-sm"
+                  >
+                    <i className="fas fa-list mr-2"></i>
+                    List View
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setViewMode('tree')}
+                    className="px-4 py-2 rounded-md text-sm font-medium bg-blue-500 text-white shadow-sm"
+                  >
+                    <i className="fas fa-sitemap mr-2"></i>
+                    Tree View
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -123,6 +162,9 @@ function App() {
             isTreeView={viewMode === 'tree'}
             allTasks={allTasksFlat}
             onSetViewMode={setViewMode}
+            onExpandAll={handleExpandAll}
+            onCollapseAll={handleCollapseAll}
+            onNewTask={() => setIsNewTaskModalOpen(true)}
           />
         </div>
       </main>
