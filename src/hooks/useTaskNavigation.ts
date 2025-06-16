@@ -145,49 +145,40 @@ export function useTaskNavigation(
       return;
     }
 
-    // Если предыдущая выбранная задача была удалена (или стала невидимой)
+    // Если предыдущая выбранная задача была удалена
     if (prevSelectedId !== null && !currentVisibleTasks.some(t => t.id === prevSelectedId)) {
-      // 1. Попытаться найти родителя предыдущей выбранной задачи
-      const prevSelectedTask = tasks.find(t => t.id === prevSelectedId);
-      if (prevSelectedTask && prevSelectedTask.parentId !== undefined) {
-        const parentOfPrevSelected = currentVisibleTasks.find(t => t.id === prevSelectedTask.parentId);
-        if (parentOfPrevSelected) {
-          setSelectedTaskId(parentOfPrevSelected.id);
+      // Находим удаленную задачу в предыдущем списке
+      const deletedTask = prevVisibleTasks.find(t => t.id === prevSelectedId);
+      if (!deletedTask) return;
+
+      // Находим все задачи с тем же parentId в текущем списке
+      const siblings = currentVisibleTasks.filter(t => t.parentId === deletedTask.parentId);
+      
+      if (siblings.length > 0) {
+        // Берем первую задачу из того же уровня
+        setSelectedTaskId(siblings[0].id);
+        return;
+      }
+
+      // Если нет задач на том же уровне, берем родителя
+      if (deletedTask.parentId !== undefined) {
+        const parentTask = currentVisibleTasks.find(t => t.id === deletedTask.parentId);
+        if (parentTask) {
+          setSelectedTaskId(parentTask.id);
           return;
         }
       }
 
-      // 2. Если родитель не найден или не является видимым, вернуться к выбору следующей/предыдущей видимой задачи по индексу
-      const prevIndex = prevVisibleTasks.findIndex(t => t.id === prevSelectedId);
-
-      // Try the same index in the new list
-      if (prevIndex !== -1 && prevIndex < currentVisibleTasks.length) {
-        setSelectedTaskId(currentVisibleTasks[prevIndex].id);
-        return;
-      }
-      
-      // Try the previous index in the new list
-      if (prevIndex > 0 && currentVisibleTasks.length > 0) {
-        setSelectedTaskId(currentVisibleTasks[Math.min(prevIndex - 1, currentVisibleTasks.length - 1)].id);
-        return;
-      }
-
-      // Try the next index in the new list
-      if (currentVisibleTasks.length > 0 && prevIndex !== -1 && prevIndex + 1 < currentVisibleTasks.length) {
-        setSelectedTaskId(currentVisibleTasks[prevIndex + 1].id);
-        return;
-      }
-
-      // 3. Если ни один из вариантов не сработал, выбираем первый видимый элемент (или null, если список пуст).
+      // Если ничего не нашли, берем первую видимую задачу
       if (currentVisibleTasks.length > 0) {
         setSelectedTaskId(currentVisibleTasks[0].id);
       } else {
-        setSelectedTaskId(null); 
+        setSelectedTaskId(null);
       }
       return;
     }
 
-    // Если не удалось сохранить позицию и нет выбранной задачи, выбираем первую (этот блок теперь дублирует часть выше, но пусть останется как запасной вариант, если prevSelectedId был null изначально)
+    // Если не удалось сохранить позицию и нет выбранной задачи, выбираем первую
     if (currentSelectedId === null && currentVisibleTasks.length > 0) {
       setSelectedTaskId(currentVisibleTasks[0].id);
     }
