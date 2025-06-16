@@ -67,6 +67,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
   const [isSiblingModalOpen, setIsSiblingModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<number | undefined>();
+  const taskListRef = useRef<HTMLDivElement>(null);
 
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
@@ -215,7 +216,28 @@ export const TaskView: React.FC<TaskViewProps> = ({
         ops.setExpandedTasks(newExpandedTasks);
       }
       nav.setSelectedTaskId(newTask.id);
+      
+      // Скроллим к новой таске
+      const taskElement = document.querySelector(`[data-task-id="${newTask.id}"]`);
+      if (taskElement) {
+        taskElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }, 0);
+  };
+
+  const scrollToTask = (taskId: number) => {
+    if (taskListRef.current) {
+      const taskElement = taskListRef.current.querySelector(`[data-task-id="${taskId}"]`);
+      if (taskElement) {
+        const containerRect = taskListRef.current.getBoundingClientRect();
+        const taskRect = taskElement.getBoundingClientRect();
+        const scrollTop = taskListRef.current.scrollTop + (taskRect.top - containerRect.top) - (containerRect.height / 2) + (taskRect.height / 2);
+        taskListRef.current.scrollTo({
+          top: scrollTop,
+          behavior: 'smooth'
+        });
+      }
+    }
   };
 
   const handleSubtaskSubmit = async (task: CreateTaskRequest) => {
@@ -240,7 +262,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
           ops.setExpandedTasks(newExpandedTasks);
         }
         nav.setSelectedTaskId(newTask.id);
-      }, 0);
+        scrollToTask(newTask.id);
+      }, 100);
     }
   };
 
@@ -335,61 +358,65 @@ export const TaskView: React.FC<TaskViewProps> = ({
           </button>
         </div>
       ) : isTreeView ? (
-        <TaskTreeView
-          tasks={tasks}
-          selectedTaskId={nav.selectedTaskId}
-          isNavigationActive={nav.isNavigationActive}
-          loading={ops.loading}
-          editingTaskId={ops.editingTask}
-          editTitle={ops.editTitle}
-          editDescription={ops.editDescription}
-          setEditTitle={ops.setEditTitle}
-          setEditDescription={ops.setEditDescription}
-          onSaveEdit={handleSaveEdit}
-          onCancelEdit={ops.handleCancelEdit}
-          onToggleComplete={handleToggleComplete}
-          onToggleExpand={(taskId: number) => ops.handleToggleExpand(taskId)}
-          onCreateSubtask={async (taskId: number) => {
-            setSelectedParentId(taskId);
-            setIsSubtaskModalOpen(true);
-          }}
-          onCreateSibling={async (taskId: number) => {
-            setSelectedParentId(taskId);
-            setIsSiblingModalOpen(true);
-          }}
-          onDelete={handleDeleteWithFocus}
-          expandedTasks={ops.expandedTasks}
-          allTasks={allTasks}
-          onSelectTask={nav.setSelectedTaskId}
-          onStartEdit={ops.handleStartEdit}
-        />
+        <div ref={taskListRef} className="space-y-2">
+          <TaskTreeView
+            tasks={tasks}
+            selectedTaskId={nav.selectedTaskId}
+            isNavigationActive={nav.isNavigationActive}
+            loading={ops.loading}
+            editingTaskId={ops.editingTask}
+            editTitle={ops.editTitle}
+            editDescription={ops.editDescription}
+            setEditTitle={ops.setEditTitle}
+            setEditDescription={ops.setEditDescription}
+            onSaveEdit={handleSaveEdit}
+            onCancelEdit={ops.handleCancelEdit}
+            onToggleComplete={handleToggleComplete}
+            onToggleExpand={(taskId: number) => ops.handleToggleExpand(taskId)}
+            onCreateSubtask={async (taskId: number) => {
+              setSelectedParentId(taskId);
+              setIsSubtaskModalOpen(true);
+            }}
+            onCreateSibling={async (taskId: number) => {
+              setSelectedParentId(taskId);
+              setIsSiblingModalOpen(true);
+            }}
+            onDelete={handleDeleteWithFocus}
+            expandedTasks={ops.expandedTasks}
+            allTasks={allTasks}
+            onSelectTask={nav.setSelectedTaskId}
+            onStartEdit={ops.handleStartEdit}
+          />
+        </div>
       ) : (
-        <TaskList
-          tasks={tasks}
-          selectedTaskId={nav.selectedTaskId}
-          isNavigationActive={nav.isNavigationActive}
-          loading={ops.loading}
-          editingTaskId={ops.editingTask}
-          editTitle={ops.editTitle}
-          editDescription={ops.editDescription}
-          setEditTitle={ops.setEditTitle}
-          setEditDescription={ops.setEditDescription}
-          onSaveEdit={handleSaveEdit}
-          onCancelEdit={ops.handleCancelEdit}
-          onToggleComplete={handleToggleComplete}
-          onCreateSubtask={async (taskId: number) => {
-            setSelectedParentId(taskId);
-            setIsSubtaskModalOpen(true);
-          }}
-          onCreateSibling={async (taskId: number) => {
-            setSelectedParentId(taskId);
-            setIsSiblingModalOpen(true);
-          }}
-          onDelete={handleDeleteWithFocus}
-          allTasks={allTasks}
-          onSelectTask={nav.setSelectedTaskId}
-          onStartEdit={ops.handleStartEdit}
-        />
+        <div ref={taskListRef} className="space-y-2">
+          <TaskList
+            tasks={tasks}
+            selectedTaskId={nav.selectedTaskId}
+            isNavigationActive={nav.isNavigationActive}
+            loading={ops.loading}
+            editingTaskId={ops.editingTask}
+            editTitle={ops.editTitle}
+            editDescription={ops.editDescription}
+            setEditTitle={ops.setEditTitle}
+            setEditDescription={ops.setEditDescription}
+            onSaveEdit={handleSaveEdit}
+            onCancelEdit={ops.handleCancelEdit}
+            onToggleComplete={handleToggleComplete}
+            onCreateSubtask={async (taskId: number) => {
+              setSelectedParentId(taskId);
+              setIsSubtaskModalOpen(true);
+            }}
+            onCreateSibling={async (taskId: number) => {
+              setSelectedParentId(taskId);
+              setIsSiblingModalOpen(true);
+            }}
+            onDelete={handleDeleteWithFocus}
+            allTasks={allTasks}
+            onSelectTask={nav.setSelectedTaskId}
+            onStartEdit={ops.handleStartEdit}
+          />
+        </div>
       )}
     </div>
   );

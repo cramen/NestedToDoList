@@ -64,7 +64,7 @@ export const TaskItem = ({
 
   useEffect(() => {
     if (isNavigationActive && selectedTaskId === task.id && taskRef.current) {
-      taskRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        taskRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [selectedTaskId, isNavigationActive, task.id]);
 
@@ -218,6 +218,7 @@ export const TaskItem = ({
   return (
     <div
       ref={taskRef}
+      data-task-id={task.id}
       className={`${indentClass} transition-all duration-200`}
       onClick={() => onSelectTask(task.id)}
     >
