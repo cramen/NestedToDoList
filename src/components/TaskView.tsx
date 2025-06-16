@@ -411,6 +411,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
             allTasks={allTasks}
             onSelectTask={nav.setSelectedTaskId}
             onStartEdit={ops.handleStartEdit}
+            expandedTasks={expandedTasks}
           />
         </div>
       )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTasks } from './hooks/useTasks';
 import { TaskView } from './components/TaskView';
 import { Task } from './types/Task';
+import { TaskForm } from './components/TaskForm';
 
 type ViewMode = 'deepest' | 'tree';
 
@@ -90,6 +91,17 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <TaskForm
+        isOpen={isNewTaskModalOpen}
+        onSubmit={async (task) => {
+          await createTask(task);
+          setIsNewTaskModalOpen(false);
+        }}
+        onCancel={() => setIsNewTaskModalOpen(false)}
+        placeholder="Enter new task title..."
+        title="Create New Task"
+      />
+
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
