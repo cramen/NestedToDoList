@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { Task, CreateTaskRequest } from '../types/Task';
 import { TaskForm } from './TaskForm';
-import { getRootTask } from '../utils/taskUtils';
+import { getRootTask, getTaskPath } from '../utils/taskUtils';
 import MarkdownRenderer from './MarkdownRenderer';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -67,7 +67,7 @@ export const TaskItem = ({
 }: TaskItemProps) => {
   const taskRef = useRef<HTMLDivElement>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const rootTask = allTasks.length > 0 ? getRootTask(allTasks, task.id) : null;
+  const taskPath = allTasks.length > 0 ? getTaskPath(allTasks, task.id) : null;
   const markdownRendererRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -202,6 +202,27 @@ export const TaskItem = ({
   const indentClass = `ml-${Math.min(depth * 4, 16)}`;
   const isSelected = isNavigationActive && selectedTaskId === task.id;
 
+  const renderTaskPath = () => {
+    if (!taskPath || taskPath.length <= 1) return null;
+
+    const rootTask = taskPath[0];
+    const parentTask = taskPath[taskPath.length - 2];
+
+    if (taskPath.length === 2) {
+      return (
+        <span className="text-xs text-gray-500">
+          (in {rootTask.title})
+        </span>
+      );
+    }
+
+    return (
+      <span className="text-xs text-gray-500">
+        (in {rootTask.title} ... {parentTask.title})
+      </span>
+    );
+  };
+
   return (
     <div
       ref={taskRef}
@@ -257,11 +278,7 @@ export const TaskItem = ({
                   <h3 className={`font-medium ${task.isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                     {task.title}
                   </h3>
-                  {rootTask && rootTask.id !== task.id && (
-                    <span className="text-xs text-gray-500">
-                      (in {rootTask.title})
-                    </span>
-                  )}
+                  {renderTaskPath()}
                 </div>
                 {task.description && (
                   <div 

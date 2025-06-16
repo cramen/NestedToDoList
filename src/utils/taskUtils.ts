@@ -38,20 +38,21 @@ export const getAllTaskIds = (tasks: Task[]): number[] => {
   return ids;
 };
 
-export const getTaskPath = (tasks: Task[], targetId: number, currentPath: Task[] = []): Task[] | null => {
-  for (const task of tasks) {
-    const newPath = [...currentPath, task];
-    if (task.id === targetId) {
-      return newPath;
-    }
-    if (task.children && task.children.length > 0) {
-      const pathInChildren = getTaskPath(task.children, targetId, newPath);
-      if (pathInChildren) {
-        return pathInChildren;
-      }
-    }
+export const getTaskPath = (tasks: Task[], targetId: number): Task[] | null => {
+  const task = tasks.find(t => t.id === targetId);
+  if (!task) return null;
+
+  const path: Task[] = [task];
+  let currentTask = task;
+
+  while (currentTask.parentId) {
+    const parentTask = tasks.find(t => t.id === currentTask.parentId);
+    if (!parentTask) break;
+    path.unshift(parentTask);
+    currentTask = parentTask;
   }
-  return null;
+
+  return path;
 };
 
 export const getRootTask = (tasks: Task[], taskId: number): Task | null => {
