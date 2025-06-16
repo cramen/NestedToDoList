@@ -67,8 +67,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
   const [isSiblingModalOpen, setIsSiblingModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<number | undefined>();
-  const [showSiblingFormId, setShowSiblingFormId] = useState<number | null>(null);
-  const [showSubtaskFormId, setShowSubtaskFormId] = useState<number | null>(null);
 
   const onFormClose = () => {
     nav.setIsNavigationActive(true);
@@ -77,8 +75,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
     setIsSiblingModalOpen(false);
     setIsEditModalOpen(false);
     setSelectedParentId(undefined);
-    setShowSiblingFormId(null);
-    setShowSubtaskFormId(null);
   };
 
   const ops = useTaskOperations({
@@ -363,10 +359,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
           }}
           onDelete={handleDeleteWithFocus}
           expandedTasks={ops.expandedTasks}
-          showSiblingFormId={showSiblingFormId}
-          setShowSiblingFormId={setShowSiblingFormId}
-          showSubtaskFormId={showSubtaskFormId}
-          setShowSubtaskFormId={setShowSubtaskFormId}
           allTasks={allTasks}
           onSelectTask={nav.setSelectedTaskId}
           onStartEdit={ops.handleStartEdit}
@@ -394,10 +386,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
             setIsSiblingModalOpen(true);
           }}
           onDelete={handleDeleteWithFocus}
-          showSiblingFormId={showSiblingFormId}
-          setShowSiblingFormId={setShowSiblingFormId}
-          showSubtaskFormId={showSubtaskFormId}
-          setShowSubtaskFormId={setShowSubtaskFormId}
           allTasks={allTasks}
           onSelectTask={nav.setSelectedTaskId}
           onStartEdit={ops.handleStartEdit}

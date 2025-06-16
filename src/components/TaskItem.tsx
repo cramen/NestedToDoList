@@ -22,10 +22,6 @@ interface TaskItemProps {
   onDelete: () => Promise<void>;
   onSaveEdit: (title: string, description: string) => Promise<void>;
   onCancelEdit: () => void;
-  showSiblingForm: number | null;
-  setShowSiblingForm: (id: number | null) => void;
-  showSubtaskForm: number | null;
-  setShowSubtaskForm: (id: number | null) => void;
   onCreateSibling: (taskId: number, task: CreateTaskRequest) => Promise<void>;
   onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<void>;
   isTreeView?: boolean;
@@ -52,10 +48,6 @@ export const TaskItem = ({
   onDelete,
   onSaveEdit,
   onCancelEdit,
-  showSiblingForm,
-  setShowSiblingForm,
-  showSubtaskForm,
-  setShowSubtaskForm,
   onCreateSibling,
   onCreateSubtask,
   isTreeView = false,
@@ -303,13 +295,13 @@ export const TaskItem = ({
                     <i className="fas fa-edit"></i>
                   </button>
                   <button
-                    onClick={() => setShowSubtaskForm(task.id)}
+                    onClick={() => onCreateSubtask(task.id, { title: '', description: '' })}
                     className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
                   >
                     <i className="fas fa-level-down-alt"></i>
                   </button>
                   <button
-                    onClick={() => setShowSiblingForm(task.id)}
+                    onClick={() => onCreateSibling(task.id, { title: '', description: '' })}
                     className="text-xs text-gray-500 hover:text-gray-700 p-1 rounded"
                   >
                     <i className="fas fa-plus-square"></i>
@@ -321,26 +313,6 @@ export const TaskItem = ({
                     <i className="fas fa-trash"></i>
                   </button>
                 </div>
-                {showSiblingForm === task.id && (
-                  <TaskForm
-                    onSubmit={async (sibling) => {
-                      await onCreateSibling(task.id, sibling);
-                    }}
-                    onCancel={() => setShowSiblingForm(null)}
-                    placeholder="Enter sibling task title..."
-                    isOpen={showSiblingForm === task.id}
-                  />
-                )}
-                {showSubtaskForm === task.id && (
-                  <TaskForm
-                    onSubmit={async (subtask) => {
-                      await onCreateSubtask(task.id, subtask);
-                    }}
-                    onCancel={() => setShowSubtaskForm(null)}
-                    placeholder="Enter subtask title..."
-                    isOpen={showSubtaskForm === task.id}
-                  />
-                )}
               </div>
             )}
           </div>

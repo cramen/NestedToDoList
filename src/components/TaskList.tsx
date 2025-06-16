@@ -19,10 +19,6 @@ interface TaskListProps {
   onCreateSubtask: (parentId: number, task: CreateTaskRequest) => Promise<void>;
   onSaveEdit: (taskId: number, title: string, description: string) => Promise<void>;
   onCancelEdit: () => void;
-  showSiblingFormId: number | null;
-  setShowSiblingFormId: (id: number | null) => void;
-  showSubtaskFormId: number | null;
-  setShowSubtaskFormId: (id: number | null) => void;
   isTreeView?: boolean;
   expandedTasks?: Set<number>;
   onToggleExpand?: (taskId: number) => void;
@@ -47,10 +43,6 @@ export const TaskList: React.FC<TaskListProps> = ({
   onCreateSubtask,
   onSaveEdit,
   onCancelEdit,
-  showSiblingFormId,
-  setShowSiblingFormId,
-  showSubtaskFormId,
-  setShowSubtaskFormId,
   isTreeView = false,
   expandedTasks = new Set(),
   onToggleExpand,
@@ -79,10 +71,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           onDelete={() => onDelete(task.id)}
           onSaveEdit={(title, description) => onSaveEdit(task.id, title, description)}
           onCancelEdit={onCancelEdit}
-          showSiblingForm={showSiblingFormId === task.id ? task.id : null}
-          setShowSiblingForm={setShowSiblingFormId}
-          showSubtaskForm={showSubtaskFormId === task.id ? task.id : null}
-          setShowSubtaskForm={setShowSubtaskFormId}
           onCreateSibling={onCreateSibling}
           onCreateSubtask={onCreateSubtask}
           isTreeView={isTreeView}
