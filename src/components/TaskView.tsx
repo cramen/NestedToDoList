@@ -346,6 +346,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
         loadingButtonText="Saving..."
       />
 
+      <NavigationHelp isTreeView={isTreeView} />
+
       {!tasks?.length ? (
         <div className="text-center py-8 flex flex-col items-center justify-center">
           <PenguinAnimation />
